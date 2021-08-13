@@ -199,10 +199,8 @@ home_container = dbc.Container(
                 dbc.Col(
                     [
                         html.Div([
-                                html.H5("Casos registrados desde el 2010", className="card-title",
-                                    style={"font-family": "revert", "color": "#5f5f5f", "padding": "10px 0 0 15px"}),
-                                dcc.Graph(id="bar-plot-all-years", figure=bar_plot_all_years(),
-                                          style={"height": "87%"})
+                                html.H5("Casos registrados desde el 2010", className="tile-title"),
+                                dcc.Graph(id="bar-plot-all-years", figure=bar_plot_all_years(), style={"height": "87%"})
                                 ],
                             style={
                                 "border": "1px solid lightgrey",
@@ -224,8 +222,8 @@ home_container = dbc.Container(
                     [
                         html.Br(),
                         html.Div([
-                            html.H5("Top 10 de barrios con mayor cantidad de casos en {}".format(2021), className="card-title",
-                                style={"font-family": "revert", "color": "#5f5f5f", "padding": "10px 0 0 15px"}),
+                            html.H5("Top 10 de barrios con mayor cantidad de casos en {}".format(2021),
+                                    className="tile-title"),
                             dcc.Graph(id="bar-plot-barrios", figure=top_ten_barrio_cases())
                         ],
                             style={
@@ -247,7 +245,7 @@ home_container = dbc.Container(
                             html.H5([
                                 "Ubicación geográfica ",
                                 html.I(className="fas fa-location-arrow", style={"color": "#5f5f5f"})],
-                                style={"font-family": "revert", "color": "#5f5f5f", "padding": "10px 0 0 15px"}),
+                                className="tile-title"),
 
                             dcc.Graph(id="map-plot", figure=map_plot_cases())
                         ],
