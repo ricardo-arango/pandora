@@ -2,20 +2,13 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import plotly.express as px
-import pandas as pd
-import geopandas
+from app import crime_df, barrio_geojson
 from datetime import date
 from lib import femicidescard, sexualviolencecard, genderviolencecard, deadlyinjurycard, nondeadlyinjurycard
 from lib import theftpeoplecard, theftresidencecard, homicidecard, personalinjurycard
 
-
 # Current date time
 current_date = date.today()
-
-# Temporal cleaning up here
-crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",")
-crime_df["GRUPO_ETARIO_VICTIMA"] = crime_df["GRUPO_ETARIO_VICTIMA"].fillna("00. Sin Información")
-barrio_geojson = geopandas.read_file("data/barrios_bucaramanga.geojson", driver="GeoJSON")
 
 
 def map_plot_cases():

@@ -9,13 +9,10 @@ import geopandas
 import branca
 import folium
 from lib import home
-from app import app
+from app import app, crime_df, barrio_geojson
 
 # Year Dropdown option to display all year's information
 allYears = "Todos"
-
-crime_df = home.crime_df
-barrio_geojson = home.barrio_geojson
 anoDropdownOptions = np.append([allYears], crime_df["AÑO"].unique())
 
 tabs_container = dbc.Container(

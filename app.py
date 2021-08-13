@@ -1,6 +1,7 @@
 import dash
 import dash_bootstrap_components as dbc
-
+import pandas as pd
+import geopandas
 import os
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -18,6 +19,15 @@ app = dash.Dash(
     requests_pathname_prefix = request_path_prefix,
     external_stylesheets = [dbc.themes.BOOTSTRAP, FA]
 )
+
+# ################################################################################
+# Loading the data
+# ################################################################################
+global crime_df
+global barrio_geojson
+crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",")
+crime_df["GRUPO_ETARIO_VICTIMA"] = crime_df["GRUPO_ETARIO_VICTIMA"].fillna("00. Sin Información")
+barrio_geojson = geopandas.read_file("data/barrios_bucaramanga.geojson", driver="GeoJSON")
 
 # We need this for function callbacks not present in the app.layout
 app.config.suppress_callback_exceptions = True
