@@ -1,0 +1,14 @@
+dash
+Bottleneck
+plotly
+pandas
+dash-bootstrap-components
+fontawesomefree
+folium
+pandas-profiling
+numpy
+matplotlib
+seaborn
+branca
+geopandas
+scipy
