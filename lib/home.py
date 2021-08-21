@@ -351,7 +351,7 @@ def refresh_dashboard_by_date(search_clicks, year, month):
         month_before = month - 1
         year_before = current_year
 
-    if year > 2010:
+    if year_before >= 2010:
         cases_before_df = crime_df[(crime_df["AÑO"] == year_before) & (crime_df["MES_num"] == month_before)]
 
     femicides_count, femicides_diff, femicides_increased = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "FEMINICIDIO")
@@ -386,6 +386,9 @@ def get_card_info(cases_df, cases_before_df, column, value):
         last_count = len(cases_before_df[cases_before_df[column] == value])
         diff = count - last_count
         increased = diff > 0
+    else:
+        diff = 0
+        increased = False
     if diff < 0:
         diff = diff * (-1)
     return count, diff, increased
