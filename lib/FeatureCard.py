@@ -101,3 +101,101 @@ def toggle_nondeadlyinjuries_modal(n1, n2, is_open):
     if n1 > 0 or n2 > 0:
         return not is_open
     return is_open
+
+@app.callback(
+    Output("sexharassment-modal", "is_open"),
+    [
+        Input("venus-mars", "n_clicks"),
+        Input("sexharassment-close", "n_clicks")
+    ],
+    [State("sexharassment-modal", "is_open")],
+    prevent_initial_call=True
+)
+def toggle_sexharassment_modal(n1, n2, is_open):
+    if n1 > 0 or n2 > 0:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("deadlyinjuries-modal", "is_open"),
+    [
+        Input("dizzy", "n_clicks"),
+        Input("deadlyinjuries-close", "n_clicks")
+    ],
+    State("deadlyinjuries-modal", "is_open"),
+    prevent_initial_call=True
+)
+def toggle_deadlyinjuries_modal(n1, n2, is_open):
+    if n1 > 0 or n2 > 0:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("homicide-modal", "is_open"),
+    [
+        Input("skull", "n_clicks"),
+        Input("homicide-close", "n_clicks")
+    ],
+    [State("homicide-modal", "is_open")],
+    prevent_initial_call=True
+)
+def toggle_homicide_modal(n1, n2, is_open):
+    if n1 > 0 or n2 > 0:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("personalinjury-modal", "is_open"),
+    [
+        Input("crutch", "n_clicks"),
+        Input("personalinjury-close", "n_clicks")
+    ],
+    State("personalinjury-modal", "is_open"),
+    prevent_initial_call=True
+)
+def toggle_personalinjury_modal(n1, n2, is_open):
+    if n1 > 0 or n2 > 0:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("sexviolence-modal", "is_open"),
+    [
+        Input("venus", "n_clicks"),
+        Input("sexviolence-close", "n_clicks")
+    ],
+    [State("sexviolence-modal", "is_open")],
+    prevent_initial_call=True
+)
+def toggle_sexviolence_modal(n1, n2, is_open):
+    if n1 > 0 or n2 > 0:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("theftpeople-modal", "is_open"),
+    [
+        Input("mask", "n_clicks"),
+        Input("theftpeople-close", "n_clicks")
+    ],
+    State("theftpeople-modal", "is_open"),
+    prevent_initial_call=True
+)
+def toggle_theftpeople_modal(n1, n2, is_open):
+    if n1 > 0 or n2 > 0:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output("theftresidence-modal", "is_open"),
+    [
+        Input("house-damage", "n_clicks"),
+        Input("theftresidence-close", "n_clicks")
+    ],
+    [State("theftresidence-modal", "is_open")],
+    prevent_initial_call=True
+)
+def toggle_theftresidence_modal(n1, n2, is_open):
+    if n1 > 0 or n2 > 0:
+        return not is_open
+    return is_open

@@ -7,7 +7,7 @@ import pandas as pd
 from app import app, crime_df, barrio_geojson
 from datetime import date
 from dash.dependencies import Input, Output, State
-from lib import femicidesmodal, nondeadlyinjuriesmodal
+from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal
 from lib.FeatureCard import FeatureCard
 
 # Current date time
@@ -15,15 +15,15 @@ current_date = date.today()
 current_year = current_date.year
 
 # Cards
-femicides_card = FeatureCard("Femicides", 0, 0, False, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card()
-sexualviolence_card = FeatureCard( "Violencia sexual", 0, 0, False, "fas fa-venus fa-2x", "venus", "0 0 0 11px", '').create_card()
-deadlyinjury_card = FeatureCard("Lesiones fatales", 0, 0, False, "fas fa-dizzy fa-2x", "dizzy", "1px 5px", '').create_card()
+femicides_card = FeatureCard("Feminicidios", 0, 0, False, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card()
+sexualviolence_card = FeatureCard( "Violencia sexual", 0, 0, False, "fas fa-venus fa-2x", "venus", "0 0 0 11px", sexviolencemodal.modal_instance).create_card()
+deadlyinjury_card = FeatureCard("Lesiones fatales", 0, 0, False, "fas fa-dizzy fa-2x", "dizzy", "1px 5px", deadlyinjuriesmodal.modal_instance).create_card()
 nondeadlyinjury_card = FeatureCard("Lesiones no fatales", 0, 0, False, "fas fa-user-injured fa-2x", "user-injured", "0 0 0 6px", nondeadlyinjuriesmodal.modal_instance).create_card()
-theftpeople_card = FeatureCard("Hurto a personas", 0, 0, False, "fas fa-mask fa-2x", "mask", "0px", '').create_card()
-theftresidence_card = FeatureCard("Hurto a residencias", 0, 0, False, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", '').create_card()
-sexharassment__card = FeatureCard("Acoso sexual", 0, 0, False, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", '').create_card()
-homicide_card = FeatureCard("Homicidio", 0, 0, False, "fas fa-skull fa-2x", "skull", "0 0 0 4px", '').create_card()
-personalinjury_card = FeatureCard("Lesiones personales", 0, 0, False, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", '').create_card()
+theftpeople_card = FeatureCard("Hurto a personas", 0, 0, False, "fas fa-mask fa-2x", "mask", "0px", theftpeoplemodal.modal_instance).create_card()
+theftresidence_card = FeatureCard("Hurto a residencias", 0, 0, False, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", theftresidencemodal.modal_instance).create_card()
+sexharassment__card = FeatureCard("Acoso sexual", 0, 0, False, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", sexharassmentmodal.modal_instance).create_card()
+homicide_card = FeatureCard("Homicidio", 0, 0, False, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card()
+personalinjury_card = FeatureCard("Lesiones personales", 0, 0, False, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", personalinjurymodal.modal_instance).create_card()
 
 
 @app.callback(
@@ -83,28 +83,6 @@ def map_plot_cases(search_btn_clicks, year):
     fig.update_geos(fitbounds="locations", visible=False)
     fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
-
-
-def bar_plot_all_years():
-    cases_df = crime_df.copy()
-    filtered_cases = cases_df.groupby('AÑO').size().reset_index(name="casos")
-    barplot_all_years = px.bar(
-        filtered_cases,
-        x="AÑO",
-        y="casos",
-        color='casos',
-        color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
-        labels={"AÑO": "Año", "casos": "Casos"}
-    )
-    barplot_all_years.update_layout(
-        font_family="revert",
-        font_color="#5f5f5f"
-    )
-
-    barplot_all_years.update_traces(opacity=0.8)
-    barplot_all_years.update_xaxes(dtick="FECHA", ticklabelmode="period")
-    barplot_all_years.update_layout(paper_bgcolor="white")
-    return barplot_all_years
 
 
 home_container = dbc.Container(
@@ -219,10 +197,62 @@ home_container = dbc.Container(
                 ])], width="5"),
                 dbc.Col(
                     [
-                        html.Div([
+                        html.Div(
+                            [
                                 html.H5("Casos registrados desde el 2010", className="tile-title"),
-                                dcc.Graph(id="bar-plot-all-years", figure=bar_plot_all_years(), style={"height": "87%"})
-                                ],
+                                dbc.Row(
+                                [
+                                    dbc.Col([
+                                        dbc.Label("Día de la Semana:", className="labels-font labels-margin"),
+                                        dcc.Dropdown(
+                                            id="diasemana",
+                                            options=[
+                                                {"label": col, "value": col} for col in crime_df["DIA_SEMANA"].str.capitalize().unique()
+                                            ]
+                                        ),
+                                    ], width="3"),
+                                    dbc.Col([
+                                        dbc.Label("Barrio:", className="labels-font labels-margin"),
+                                        dcc.Dropdown(
+                                            id="barrio",
+                                            options=[
+                                                {"label": col, "value": col} for col in crime_df["BARRIO"].str.capitalize().unique()
+                                            ]
+                                        ),
+                                    ], width="3"),
+                                    dbc.Col([
+                                        dbc.Label("Tipo de lesión:", className="labels-font labels-margin"),
+                                        dcc.Dropdown(
+                                            id="tipolesion",
+                                            options=[
+                                                {"label": col, "value": col} for col in crime_df["TIPO_LESION"].str.capitalize().unique()
+                                            ]
+                                        ),
+                                    ], width="3"),
+                                    dbc.Col([
+                                        dbc.Label("Grupo etario víctima:", className="labels-font labels-margin"),
+                                        dcc.Dropdown(
+                                            id="grupoetario",
+                                            options=[
+                                                {"label": col, "value": col} for col in crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
+                                            ]
+                                        ),
+                                    ], width="3")
+                                ], style={"padding": "0 16px 0 16px"}),
+                                html.Div(
+                                    dbc.Checklist(
+                                        id="diasemana-toggle",
+                                        value=[0],
+                                        switch=True,
+                                        options=[
+                                            {"label": "Mostrar por día de la semana", "value": 1}
+                                        ],
+                                        className="toggle-font"
+                                    ),
+                                    style={"padding-left": "16px", "margin": "6px 0 -20px 0"}
+                                ),
+                                dcc.Graph(id="bar-plot-all-years", style={"height": "74%"})
+                            ],
                             style={
                                 "border": "1px solid lightgrey",
                                 "width": "100.8%",
@@ -265,9 +295,8 @@ home_container = dbc.Container(
                     [
                         html.Br(),
                         html.Div([
-                            html.H5([
+                            html.H5(
                                 "Ubicación geográfica ",
-                                html.I(className="fas fa-location-arrow", style={"color": "#5f5f5f"})],
                                 className="tile-title"),
                             dcc.Graph(id="map-plot")
                         ],
@@ -282,6 +311,123 @@ home_container = dbc.Container(
                         }
                         )
                     ], width="5"
+                )
+            ]
+        ),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Div([
+                            html.H5(
+                                "Panel 1 title",
+                                className="tile-title"
+                            ),
+                            dcc.Graph(id="graph1")
+                        ],
+                        style={
+                            "border": "1px solid lightgrey",
+                            "width": "100%",
+                            "height": "100%",
+                            "margin": "5px",
+                            "padding-right": "5px",
+                            "background": "white",
+                            "border-radius": "10px"
+                        }
+                        )
+                    ], width="4"
+                ),
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Div([
+                            html.H5(
+                                "Panel 2 Title",
+                                className="tile-title"),
+                            dcc.Graph(id="graph2")
+                        ],
+                        style={
+                            "border": "1px solid lightgrey",
+                            "width": "100%",
+                            "height": "100%",
+                            "margin": "5px",
+                            "padding-right": "5px",
+                            "background": "white",
+                            "border-radius": "10px"
+                        }
+                        )
+                    ], width="4"
+                ),
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Div([
+                            html.H5(
+                                "Panel 3 Title",
+                                className="tile-title"),
+                            dcc.Graph(id="graph3")
+                        ],
+                        style={
+                            "border": "1px solid lightgrey",
+                            "width": "100%",
+                            "height": "100%",
+                            "margin": "5px",
+                            "padding-right": "5px",
+                            "background": "white",
+                            "border-radius": "10px"
+                        }
+                        )
+                    ], width="4"
+                )
+            ]
+        ),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Div([
+                            html.H5(
+                                "Panel 4 title",
+                                className="tile-title"
+                            ),
+                            dcc.Graph(id="graph4")
+                        ],
+                        style={
+                            "border": "1px solid lightgrey",
+                            "width": "100%",
+                            "height": "100%",
+                            "margin": "5px",
+                            "padding-right": "5px",
+                            "background": "white",
+                            "border-radius": "10px"
+                        }
+                        )
+                    ], width="5"
+                ),
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Div([
+                            html.H5(
+                                "Panel 5 Title",
+                                className="tile-title"),
+                            dcc.Graph(id="graph5")
+                        ],
+                        style={
+                            "border": "1px solid lightgrey",
+                            "width": "100%",
+                            "height": "100%",
+                            "margin": "5px",
+                            "padding-right": "5px",
+                            "background": "white",
+                            "border-radius": "10px"
+                        }
+                        )
+                    ], width="7"
                 )
             ]
         ),
@@ -365,14 +511,14 @@ def refresh_dashboard_by_date(search_clicks, year, month):
     sexharassment_count, sexharassment_diff, sexharassment_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "ACOSO SEXUAL")
     if search_clicks > 0:
         f = FeatureCard("Femicides", femicides_count, femicides_diff, femicides_increased, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card(),
-        vs = FeatureCard("Violencia sexual", sexualviolence_count, sexualviolence_diff, sexualviolence_increase, "fas fa-venus fa-2x", "venus", "0 0 0 11px", '').create_card(),
-        lf = FeatureCard("Lesiones fatales", deadly_count, deadly_diff, deadly_increase, "fas fa-dizzy fa-2x", "dizzy", "1px 5px", '').create_card(),
+        vs = FeatureCard("Violencia sexual", sexualviolence_count, sexualviolence_diff, sexualviolence_increase, "fas fa-venus fa-2x", "venus", "0 0 0 11px", sexviolencemodal.modal_instance).create_card(),
+        lf = FeatureCard("Lesiones fatales", deadly_count, deadly_diff, deadly_increase, "fas fa-dizzy fa-2x", "dizzy", "1px 5px", deadlyinjuriesmodal.modal_instance).create_card(),
         lnf = FeatureCard("Lesiones no fatales", nondeadly_count, nondeadly_diff, nondeadly_increase, "fas fa-user-injured fa-2x", "user-injured", "0 0 0 6px", nondeadlyinjuriesmodal.modal_instance).create_card(),
-        hp = FeatureCard("Hurto a personas",  h_personas_count, h_personas_diff, h_personas_increase, "fas fa-mask fa-2x", "mask", "0px", '').create_card(),
-        hr = FeatureCard("Hurto a residencias", h_residence_count, h_residence_diff, h_residence_increase, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", '').create_card(),
-        vg = FeatureCard("Acoso sexual", sexharassment_count, sexharassment_diff, sexharassment_increase, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", '').create_card(),
-        h = FeatureCard("Homicidio", homicide_count, homicide_diff, homicide_increase, "fas fa-skull fa-2x", "skull", "0 0 0 4px", '').create_card(),
-        lp = FeatureCard("Lesiones personales", p_injuries_count, p_injuries_diff, p_injuries_increase, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", '').create_card(),
+        hp = FeatureCard("Hurto a personas",  h_personas_count, h_personas_diff, h_personas_increase, "fas fa-mask fa-2x", "mask", "0px", theftpeoplemodal.modal_instance).create_card(),
+        hr = FeatureCard("Hurto a residencias", h_residence_count, h_residence_diff, h_residence_increase, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", theftresidencemodal.modal_instance).create_card(),
+        vg = FeatureCard("Acoso sexual", sexharassment_count, sexharassment_diff, sexharassment_increase, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", sexharassmentmodal.modal_instance).create_card(),
+        h = FeatureCard("Homicidio", homicide_count, homicide_diff, homicide_increase, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card(),
+        lp = FeatureCard("Lesiones personales", p_injuries_count, p_injuries_diff, p_injuries_increase, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", personalinjurymodal.modal_instance).create_card(),
         return f, vs, lf, lnf, hp, hr, vg, h, lp
     return femicides_card, sexualviolence_card, deadlyinjury_card, nondeadlyinjury_card, theftpeople_card, \
            theftresidence_card, sexharassment__card, homicide_card, personalinjury_card
@@ -392,3 +538,60 @@ def get_card_info(cases_df, cases_before_df, column, value):
     if diff < 0:
         diff = diff * (-1)
     return count, diff, increased
+
+
+@app.callback(
+    Output("bar-plot-all-years", "figure"),
+    [
+     Input("diasemana", "value"),
+     Input("barrio", "value"),
+     Input("tipolesion", "value"),
+     Input("grupoetario", "value"),
+     Input("diasemana-toggle", "value")
+    ],
+)
+def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, mostrar_por_dia_semana):
+    cases_df = crime_df.copy()
+    cases_df['BARRIO'] = cases_df['BARRIO'].str.capitalize()
+    cases_df['DIA_SEMANA'] = cases_df['DIA_SEMANA'].str.capitalize()
+    cases_df['TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
+    cases_df['GRUPO_ETARIO_VICTIMA'] = cases_df['GRUPO_ETARIO_VICTIMA'].str.capitalize()
+    if barrio:
+        cases_df = cases_df[cases_df["BARRIO"] == barrio]
+        print(len(cases_df))
+    if tipo_lesion:
+        cases_df = cases_df[cases_df["TIPO_LESION"] == tipo_lesion]
+    if dia_semana:
+        cases_df = cases_df[cases_df["DIA_SEMANA"] == dia_semana]
+    if grupo_etario:
+        cases_df = cases_df[cases_df["GRUPO_ETARIO_VICTIMA"] == grupo_etario]
+
+    # This if means the "Mostrar por día de la semana" toggle is off
+    if len(mostrar_por_dia_semana) == 1:
+        filtered_cases = cases_df.groupby('AÑO').size().reset_index(name="Casos")
+        barplot_all_years = px.bar(
+            filtered_cases,
+            x="AÑO",
+            y="Casos",
+            color='Casos',
+            color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
+            labels={"AÑO": "Año"}
+        )
+    else:
+        filtered_cases = cases_df.groupby('DIA_SEMANA').size().reset_index(name="Casos")
+        barplot_all_years = px.bar(
+            filtered_cases,
+            x="DIA_SEMANA",
+            y="Casos",
+            color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
+            labels={"DIA_SEMANA": "Día de la semana"}
+        )
+
+    barplot_all_years.update_layout(
+        font_family="revert",
+        font_color="#5f5f5f"
+    )
+    barplot_all_years.update_traces(opacity=0.8)
+    barplot_all_years.update_xaxes(dtick="FECHA", ticklabelmode="period")
+    barplot_all_years.update_layout(paper_bgcolor="white")
+    return barplot_all_years
