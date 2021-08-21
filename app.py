@@ -26,7 +26,6 @@ app = dash.Dash(
 global crime_df
 global barrio_geojson
 crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",")
-crime_df["GRUPO_ETARIO_VICTIMA"] = crime_df["GRUPO_ETARIO_VICTIMA"].fillna("00. Sin Información")
 barrio_geojson = geopandas.read_file("data/barrios_bucaramanga.geojson", driver="GeoJSON")
 
 # We need this for function callbacks not present in the app.layout

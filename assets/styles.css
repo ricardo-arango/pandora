@@ -86,3 +86,17 @@
     color: #5f5f5f;
     padding: 10px 0 0 15px;
 }
+
+.data-type-card {
+    width: 12rem;
+    height: 8rem;
+    margin: 5px;
+}
+
+.card_arrow_up {
+    color: #ce071a;
+}
+
+.card_arrow_down {
+    color: #52cc52;
+}

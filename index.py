@@ -1,15 +1,6 @@
-import pathlib
-import dash
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
-from dash.dependencies import Input, Output, State, ClientsideFunction
-from dash.exceptions import PreventUpdate
-import pandas as pd
+from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import dash_core_components as dcc
-import geopandas
 from app import app
 from lib import sidebar, content, graphics, navbar, home
 app.layout = html.Div([dcc.Location(id="url"), navbar.navbar, sidebar.sidebar, content.content])
@@ -21,31 +12,17 @@ app.layout = html.Div([dcc.Location(id="url"), navbar.navbar, sidebar.sidebar, c
 
 
 # ################################################################################
-# Loading the data
-# ################################################################################
-# crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",")
-# crime_df["GRUPO_ETARIO_VICTIMA"] = crime_df["GRUPO_ETARIO_VICTIMA"].fillna("00. Sin Información")
-# barrio_geojson = geopandas.read_file("data/barrios_bucaramanga.geojson", driver="GeoJSON")
-# Commented out because the html report is already created and saved under de assets folder
-# crime_df = pd.read_csv("data/policia-2010-2020-cleanedup.csv", delimiter=",")
-# profile = pandas_profiling.ProfileReport(crime_df)
-# profile.to_file("reporte-datos-policia.html")
-
-
-
-
-# ################################################################################
 # Callbacks
 # ################################################################################
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
-    if pathname == "/user/ricardoutd@gmail.com/proxy/8050/" or pathname == "/user/ricardoutd@gmail.com/proxy/8050":
+    if pathname == "/" or pathname == "":
         return home.home_container
-    elif pathname == "/user/ricardoutd@gmail.com/proxy/8050/graficas":
+    elif pathname == "/graficas":
         return graphics.tabs_container
-    elif pathname == "/user/ricardoutd@gmail.com/proxy/8050/reportes":
+    elif pathname == "/reportes":
         return profile_data
-    elif pathname == "/user/ricardoutd@gmail.com/proxy/8050/resumen":
+    elif pathname == "/resumen":
         return html.H2("Resumen")
     else:
         return home.home_container

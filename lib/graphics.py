@@ -3,12 +3,9 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 from dash.dependencies import Input, Output
 import plotly.express as px
-import pandas as pd
 import numpy as np
-import geopandas
 import branca
 import folium
-from lib import home
 from app import app, crime_df, barrio_geojson
 
 # Year Dropdown option to display all year's information
