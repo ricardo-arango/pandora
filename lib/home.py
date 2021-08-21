@@ -4,7 +4,8 @@ import dash_core_components as dcc
 import plotly.express as px
 import pandas as pd
 
-from app import app, crime_df, barrio_geojson
+from app import app
+from dataloading import crime_df, barrio_geojson, spunit_db, spunit_js
 from datetime import date
 from dash.dependencies import Input, Output, State
 from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal
@@ -35,17 +36,17 @@ def get_top_ten_barrios_graph(search_btn_clicks, year):
     global current_year
     current_year = year
     cases_df = crime_df[crime_df["AÑO"] == current_year]
-    cases_df["BARRIO"] = cases_df["BARRIO"].str.capitalize()
-    barrio_cn = cases_df.groupby("BARRIO")["CRIMEN_ID"].count().reset_index(name="casos")
+    cases_df[spunit_db] = cases_df[spunit_db].str.capitalize()
+    barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
     barrio_cn = barrio_cn.sort_values(by="casos", ascending=False).head(10)
     barrio_cn = barrio_cn.sort_values(by="casos")
     bar_plot = px.bar(
         barrio_cn,
         x="casos",
-        y="BARRIO",
+        y=spunit_db,
         color='casos',
         color_continuous_scale=px.colors.sequential.Blues,
-        labels={"casos": "Casos {}".format(year), "BARRIO": "Barrio"}
+        labels={"casos": "Casos {}".format(year), spunit_db: "Unidad Espacial"}
     )
     bar_plot.update_traces(
         marker_line_color='rgb(8,48,107)',
@@ -66,13 +67,13 @@ def map_plot_cases(search_btn_clicks, year):
     global current_year
     current_year = year
     cases_df = crime_df[crime_df["AÑO"] == current_year]
-    barrio_cn = cases_df.groupby("BARRIO")["CRIMEN_ID"].count().reset_index(name="casos")
+    barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
     fig = px.choropleth(
         barrio_cn,
         geojson=barrio_geojson,
         color="casos",
         color_continuous_scale=px.colors.sequential.Blues,
-        locations="BARRIO", featureidkey="properties.NOMBRE",
+        locations=spunit_db, featureidkey="properties."+spunit_js,
         projection="mercator",
         labels={"casos": "Casos {}".format(year)}
     )
@@ -552,12 +553,12 @@ def get_card_info(cases_df, cases_before_df, column, value):
 )
 def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, mostrar_por_dia_semana):
     cases_df = crime_df.copy()
-    cases_df['BARRIO'] = cases_df['BARRIO'].str.capitalize()
-    cases_df['DIA_SEMANA'] = cases_df['DIA_SEMANA'].str.capitalize()
-    cases_df['TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
+    cases_df[spunit_db] = cases_df[spunit_db].str.capitalize()
+    cases_df.loc[:, 'DIA_SEMANA'] = cases_df['DIA_SEMANA'].str.capitalize()
+    cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
     cases_df['GRUPO_ETARIO_VICTIMA'] = cases_df['GRUPO_ETARIO_VICTIMA'].str.capitalize()
     if barrio:
-        cases_df = cases_df[cases_df["BARRIO"] == barrio]
+        cases_df = cases_df[cases_df[spunit_db] == barrio]
         print(len(cases_df))
     if tipo_lesion:
         cases_df = cases_df[cases_df["TIPO_LESION"] == tipo_lesion]

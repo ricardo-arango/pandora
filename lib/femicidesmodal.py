@@ -2,12 +2,12 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import plotly.express as px
-from app import crime_df
+from dataloading import crime_df
 
 def femicides_plot():
     tipo_delito_fem_df = crime_df[crime_df["TIPO_DELITO"] == "FEMINICIDIO"]
-    tipo_delito_fem_df["TIPO_CONDUCTA"] = tipo_delito_fem_df["TIPO_CONDUCTA"].str.capitalize()
-    tipo_delito_fem_df["GENERO_VICTIMA"] = tipo_delito_fem_df["GENERO_VICTIMA"].str.capitalize()
+    tipo_delito_fem_df.loc[:, "TIPO_CONDUCTA"] = tipo_delito_fem_df["TIPO_CONDUCTA"].str.capitalize()
+    tipo_delito_fem_df.loc[:, "GENERO_VICTIMA"] = tipo_delito_fem_df["GENERO_VICTIMA"].str.capitalize()
     tipo_conducta_df = tipo_delito_fem_df.groupby(["TIPO_CONDUCTA", "GENERO_VICTIMA"]).size().reset_index(name="Casos")
 
     fig = px.bar(

@@ -6,7 +6,8 @@ import plotly.express as px
 import numpy as np
 import branca
 import folium
-from app import app, crime_df, barrio_geojson
+from app import app
+from dataloading import crime_df, barrio_geojson, spunit_db, spunit_js
 
 # Year Dropdown option to display all year's information
 allYears = "Todos"
@@ -64,7 +65,7 @@ lineCard = dbc.Card(
                 dcc.Dropdown(
                     id="barrio",
                     options=[
-                        {"label": col, "value": col} for col in crime_df["BARRIO"].unique()
+                        {"label": col, "value": col} for col in crime_df[spunit_db].unique()
                     ],
                     placeholder="Seleccione el barrio...",
                 ),
@@ -143,7 +144,7 @@ mapFoliumCard = dbc.Card(
                 dcc.Dropdown(
                     id="map-fol-barrio",
                     options=[
-                        {"label": col, "value": col} for col in crime_df["BARRIO"].unique()
+                        {"label": col, "value": col} for col in crime_df[spunit_db].unique()
                     ],
                     placeholder="Seleccione el barrio...",
                 ),
@@ -222,7 +223,7 @@ mapPlotlyCard = dbc.Card(
                 dcc.Dropdown(
                     id="map-plo-barrio",
                     options=[
-                        {"label": col, "value": col} for col in crime_df["BARRIO"].unique()
+                        {"label": col, "value": col} for col in crime_df[spunit_db].unique()
                     ],
                     placeholder="Seleccione el barrio...",
                 ),
@@ -301,7 +302,7 @@ barCard = dbc.Card(
                 dcc.Dropdown(
                     id="bar-barrio",
                     options=[
-                        {"label": col, "value": col} for col in crime_df["BARRIO"].unique()
+                        {"label": col, "value": col} for col in crime_df[spunit_db].unique()
                     ],
                     placeholder="Seleccione el barrio...",
                 ),
@@ -425,7 +426,7 @@ def line_plot_monthly_cases_by_year(year, diaSemana, barrio, tipoLesion, tipoDel
     if diaSemana:
         cases_df = cases_df[cases_df["DIA_SEMANA"] == diaSemana]
     if barrio:
-        cases_df = cases_df[cases_df["BARRIO"] == barrio]
+        cases_df = cases_df[cases_df[spunit_db] == barrio]
     if tipoLesion:
         cases_df = cases_df[cases_df["TIPO_LESION"] == tipoLesion]
     if tipoDelito:
@@ -475,7 +476,7 @@ def map_plot_cases(year, barrio, tipoLesion, tipoDelito, grupoEtario):
 
     cases_df = crime_df[crime_df["AÑO"] == year]
     if barrio:
-        cases_df = cases_df[cases_df["BARRIO"] == barrio]
+        cases_df = cases_df[cases_df[spunit_db] == barrio]
     if tipoLesion:
         cases_df = cases_df[cases_df["TIPO_LESION"] == tipoLesion]
     if tipoDelito:
@@ -483,7 +484,7 @@ def map_plot_cases(year, barrio, tipoLesion, tipoDelito, grupoEtario):
     if grupoEtario:
         cases_df = cases_df[cases_df["GRUPO_ETARIO_VICTIMA"] == grupoEtario]
 
-    barrio_cn = cases_df.groupby("BARRIO")["CRIMEN_ID"].count().reset_index(name="casos")
+    barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
     min_cn, max_cn = barrio_cn['casos'].quantile([0.01, 0.99]).apply(round, 2)
 
     colormap = branca.colormap.LinearColormap(
@@ -494,7 +495,7 @@ def map_plot_cases(year, barrio, tipoLesion, tipoDelito, grupoEtario):
 
     colormap.caption = "Número total de casos por barrio"
 
-    barrios_df = barrio_geojson.join(barrio_cn.set_index("BARRIO"), how="left", on="NOMBRE")
+    barrios_df = barrio_geojson.join(barrio_cn.set_index(spunit_db), how="left", on=spunit_js)
     barrios_df.fillna(0, inplace=True)
 
     bucaramangaPolygonMap = folium.Map(location=[7.11392, -73.1198], zoom_start=14, tiles="OpenStreetMap")
@@ -555,7 +556,7 @@ def map_plot_cases(year, barrio, tipoLesion, tipoDelito, grupoEtario):
         year = 2010
     cases_df = crime_df[crime_df["AÑO"] == year]
     if barrio:
-        cases_df = cases_df[cases_df["BARRIO"] == barrio]
+        cases_df = cases_df[cases_df[spunit_db] == barrio]
     if tipoLesion:
         cases_df = cases_df[cases_df["TIPO_LESION"] == tipoLesion]
     if tipoDelito:
@@ -563,10 +564,10 @@ def map_plot_cases(year, barrio, tipoLesion, tipoDelito, grupoEtario):
     if grupoEtario:
         cases_df = cases_df[cases_df["GRUPO_ETARIO_VICTIMA"] == grupoEtario]
 
-    barrio_cn = cases_df.groupby("BARRIO")["CRIMEN_ID"].count().reset_index(name="casos")
+    barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
 
     fig = px.choropleth(barrio_cn, geojson=barrio_geojson, color="casos",
-                        locations="BARRIO", featureidkey="properties.NOMBRE",
+                        locations=spunit_db, featureidkey="properties.NOMBRE",
                         projection="mercator"
                         )
 
@@ -595,7 +596,7 @@ def bar_plot_monthly_cases_by_year(year, barrio, tipoLesion, tipoDelito, grupoEt
         cases_df = crime_df.copy()
 
     if barrio:
-        cases_df = cases_df[cases_df["BARRIO"] == barrio]
+        cases_df = cases_df[cases_df[spunit_db] == barrio]
     if tipoLesion:
         cases_df = cases_df[cases_df["TIPO_LESION"] == tipoLesion]
     if tipoDelito:

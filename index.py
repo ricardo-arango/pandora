@@ -1,8 +1,16 @@
-from dash.dependencies import Input, Output, State
-import dash_html_components as html
+# ################################################################################
+# Load/invoke required libraries/modules
+# ################################################################################
 import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output, State
+
 from app import app
 from lib import sidebar, content, graphics, navbar, home
+
+# ################################################################################
+# XXXXXXX
+# ################################################################################
 app.layout = html.Div([dcc.Location(id="url"), navbar.navbar, sidebar.sidebar, content.content])
 
 # ################################################################################

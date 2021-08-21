@@ -1,0 +1,26 @@
+{
+"type": "FeatureCollection",
+"name": "Estaciones_policia",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "LATITUD": 7.1164896, "LONGITUD": -73.1120825, "NOMBRE": "CAI SOTOMAYOR" }, "geometry": { "type": "Point", "coordinates": [ -73.1120825, 7.1164896 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1286976, "LONGITUD": -73.1247962, "NOMBRE": "OFICINA ATENCIÓN AL CIUDADANO" }, "geometry": { "type": "Point", "coordinates": [ -73.1247962, 7.1286976 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.0990524, "LONGITUD": -73.1255706, "NOMBRE": "POLICIA NACIONAL REAL DE MINAS CAI" }, "geometry": { "type": "Point", "coordinates": [ -73.1255706, 7.0990524 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1178298, "LONGITUD": -73.1370937, "NOMBRE": "CAI SANTANDER" }, "geometry": { "type": "Point", "coordinates": [ -73.1370937, 7.1178298 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1186108, "LONGITUD": -73.1091518, "NOMBRE": "CAI SAN PIO" }, "geometry": { "type": "Point", "coordinates": [ -73.1091518, 7.1186108 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1224836, "LONGITUD": -73.1339547, "NOMBRE": "CAI GIRARDOT" }, "geometry": { "type": "Point", "coordinates": [ -73.1339547, 7.1224836 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.12664, "LONGITUD": -73.1100091, "NOMBRE": "CAI LAS AMERICAS" }, "geometry": { "type": "Point", "coordinates": [ -73.1100091, 7.12664 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1018035, "LONGITUD": -73.1289482, "NOMBRE": "ESTACIÓN POLICÍA SUR" }, "geometry": { "type": "Point", "coordinates": [ -73.1289482, 7.1018035 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1013338, "LONGITUD": -73.1407281, "NOMBRE": "CAI CAMPO HERMOSO" }, "geometry": { "type": "Point", "coordinates": [ -73.1407281, 7.1013338 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1309077, "LONGITUD": -73.1247316, "NOMBRE": "CAI SAN FRANCISCO" }, "geometry": { "type": "Point", "coordinates": [ -73.1247316, 7.1309077 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1158761, "LONGITUD": -73.1287078, "NOMBRE": "COMANDO METROPOLITANO DE POLICIA" }, "geometry": { "type": "Point", "coordinates": [ -73.1287078, 7.1158761 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1221507, "LONGITUD": -73.1251189, "NOMBRE": "CAI CENTENARIO" }, "geometry": { "type": "Point", "coordinates": [ -73.1251189, 7.1221507 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.114938, "LONGITUD": -73.129539, "NOMBRE": "EFECTY CALLE 42 COMANDO DE POLICIA" }, "geometry": { "type": "Point", "coordinates": [ -73.129539, 7.114938 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1231838, "LONGITUD": -73.1250203, "NOMBRE": "ESTACIÓN DE POLICÍA CENTRO" }, "geometry": { "type": "Point", "coordinates": [ -73.1250203, 7.1231838 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1412614, "LONGITUD": -73.1331857, "NOMBRE": "CAI POLICE VIRGIN" }, "geometry": { "type": "Point", "coordinates": [ -73.1331857, 7.1412614 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1036937, "LONGITUD": -73.1264464, "NOMBRE": "ESTACIÓN DE POLICIA SUR BUCARAMANGA" }, "geometry": { "type": "Point", "coordinates": [ -73.1264464, 7.1036937 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.0976464, "LONGITUD": -73.113579, "NOMBRE": "INSPECCIÓN DE POLICÍA BUCARAMANGA" }, "geometry": { "type": "Point", "coordinates": [ -73.113579, 7.0976464 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1461981, "LONGITUD": -73.126462, "NOMBRE": "CAI ESPERANZA I CUADRANTE 006" }, "geometry": { "type": "Point", "coordinates": [ -73.126462, 7.1461981 ] } },
+{ "type": "Feature", "properties": { "LATITUD": 7.1227501, "LONGITUD": -73.1192885, "NOMBRE": "SIJIN CRIMINAL INVESTIGATION BRANCH SANTANDER" }, "geometry": { "type": "Point", "coordinates": [ -73.1192885, 7.1227501 ] } }
+]
+}
