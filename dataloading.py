@@ -11,9 +11,11 @@
 import geopandas
 import numpy as np
 import pandas as pd
+import pandas.io.sql as psql
 from geopy import distance
 from geopandas.tools import sjoin
 from sklearn.neighbors import BallTree
+import psycopg2
 
 # ################################################################################
 # Declare and define global variables
@@ -29,6 +31,7 @@ spunit_js = "NOMBRE"
 # ################################################################################
 # Load and adjust default crime database (Jan 2010 - Feb 2021)
 # ################################################################################
+column_names = ['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA','DIA_SEMANA_num', 'LATITUD', 'LONGITUD', 'ZONA', 'COMUNA', 'COMUNA_num','BARRIO', 'UNIDAD_ESPACIAL', 'TIPO_DELITO_ARTICULO', 'TIPO_DELITO','TIPO_CONDUCTA', 'TIPO_LESION', 'GENERO_VICTIMA', 'EDAD_VICTIMA','GRUPO_ETARIO_VICTIMA', 'GRUPO_ETARIO_VICTIMA_num','ESTADO_CIVIL_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMA','MEDIO_TRANSPORTE_VICTIMARIO', 'TIPO_ARMA','DISTANCIA_ESTACION_POLICIA_CERCANA', 'ESTACION_POLICIA_CERCANA']
 dtypes = {"MES": "category",
           "DIA_SEMANA": "category",
           "ZONA": "category",
@@ -47,8 +50,33 @@ dtypes = {"MES": "category",
           "MEDIO_TRANSPORTE_VICTIMARIO": "category",
           "TIPO_ARMA": "category",
           "ESTACION_POLICIA_CERCANA": "category"}
-crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",", encoding="utf-8", dtype=dtypes, parse_dates=["FECHA"])
 
+# ################################################################################
+# Load and adjust default crime database
+# ################################################################################
+conn = None
+try:
+    # connect to the PostgreSQL server
+    connection = psycopg2.connect(
+        host="bucaramangadb.cx4nqzuqwvdx.us-east-1.rds.amazonaws.com",
+        database="crimenes",
+        user="dbadmin",
+        password="rootadmin"
+    )
+    cursor = connection.cursor()
+    cursor.execute('select * from casos')
+    cases = cursor.fetchall()
+    crime_df = pd.DataFrame(cases, columns=column_names)
+except (Exception, psycopg2.DatabaseError) as error:
+    print("ERROR. Reading the data from the file then.")
+    print(error)
+    crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",", encoding="utf-8", dtype=dtypes, parse_dates=["FECHA"])
+finally:
+    if connection is not None:
+        cursor.close()
+        connection.close()
+
+crime_df = crime_df.astype(dtypes)
 # Adjust value order of several categorical fields
 column_dtype = pd.api.types.CategoricalDtype(categories=['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'], ordered=True)
 crime_df["MES"] = crime_df["MES"].astype(column_dtype)

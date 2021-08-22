@@ -240,6 +240,7 @@ home_container = dbc.Container(
                                         ),
                                     ], width="3")
                                 ], style={"padding": "0 16px 0 16px"}),
+                                dcc.Graph(id="bar-plot-all-years", style={"height": "74%"}),
                                 html.Div(
                                     dbc.Checklist(
                                         id="diasemana-toggle",
@@ -250,9 +251,8 @@ home_container = dbc.Container(
                                         ],
                                         className="toggle-font"
                                     ),
-                                    style={"padding-left": "16px", "margin": "6px 0 -20px 0"}
+                                    style={"padding-left": "16px", "margin": "-27px 0"}
                                 ),
-                                dcc.Graph(id="bar-plot-all-years", style={"height": "74%"})
                             ],
                             style={
                                 "border": "1px solid lightgrey",

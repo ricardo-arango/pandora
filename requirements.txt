@@ -11,6 +11,7 @@ matplotlib
 plotly
 pandas
 pandas-profiling
+psycopg2
 pygeos
 scipy
 seaborn
