@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 from app import app
-from dataloading import crime_df, barrio_geojson, spunit_db, spunit_js
+from dataloading import crime_df, police_stations_df, barrio_geojson, spunit_db, spunit_js
 from datetime import date
 from dash.dependencies import Input, Output, State
 from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal, applicationconstants
@@ -16,7 +16,7 @@ current_date = date.today()
 current_year = current_date.year
 all_trasportation_assailant = np.append([applicationconstants.all_label], crime_df["MEDIO_TRANSPORTE_VICTIMARIO"].str.capitalize().unique())
 all_gun_type = np.append([applicationconstants.all_label], crime_df["TIPO_ARMA"].str.capitalize().unique())
-all_injury_type = np.append([applicationconstants.all_label], crime_df["TIPO_LESION"].str.capitalize().unique())
+all_crime_type = np.append([applicationconstants.all_label], crime_df["TIPO_DELITO"].str.capitalize().unique())
 
 # Cards
 femicides_card = FeatureCard("Feminicidios", 0, 0, False, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card()
@@ -42,7 +42,7 @@ def get_top_ten_barrios_graph(search_btn_clicks, year, month):
     global current_year
     current_year = year
     cases_df = crime_df[(crime_df["AÑO"] == current_year) & (crime_df["MES_num"] == month)]
-    cases_df[spunit_db] = cases_df[spunit_db].str.capitalize()
+    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.capitalize()
     barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
     barrio_cn = barrio_cn.sort_values(by="casos", ascending=False).head(10)
     barrio_cn = barrio_cn.sort_values(by="casos")
@@ -81,7 +81,7 @@ def map_plot_cases(search_btn_clicks, year):
         color_continuous_scale=px.colors.sequential.Blues,
         locations=spunit_db, featureidkey="properties."+spunit_js,
         projection="mercator",
-        labels={"casos": "Casos"},
+        labels={"casos": "Casos", spunit_db: "Barrio"}
     )
     fig.update_layout(
         font_family="revert",
@@ -89,6 +89,64 @@ def map_plot_cases(search_btn_clicks, year):
     )
     fig.update_geos(fitbounds="locations", visible=False)
     fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    return fig
+
+@app.callback(
+    Output("police-stat-plot", "figure"),
+    Input("search-btn", "n_clicks"),
+    [
+        State("year", "value"),
+        State("month", "value"),
+    ]
+)
+def get_cases_by_police_station(search_btn_clicks, year, month):
+    global current_year
+    current_year = year
+    cases_df = crime_df[(crime_df["AÑO"] == current_year) & (crime_df["MES_num"] == month)]
+    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.capitalize()
+    cases_df.loc[:, "ESTACION_POLICIA_CERCANA"] = cases_df["ESTACION_POLICIA_CERCANA"].str.capitalize()
+    cases_df = cases_df.groupby(["ESTACION_POLICIA_CERCANA"])["CRIMEN_ID"].count().reset_index(name="Casos")
+    cases_df = cases_df.sort_values(by="Casos", ascending=False)
+
+    bar_plot = px.bar(
+        cases_df,
+        x="ESTACION_POLICIA_CERCANA",
+        y="Casos",
+        color='Casos',
+        color_continuous_scale=px.colors.sequential.Blues,
+        labels={"casos": "Casos", "ESTACION_POLICIA_CERCANA": "Estación de policía"}
+    )
+    bar_plot.update_traces(
+        marker_line_color='rgb(8,48,107)',
+        marker_line_width=0.05,
+        opacity=1)
+    bar_plot.update_layout(
+        font_family="revert",
+        font_color="#5f5f5f"
+    )
+    return bar_plot
+
+
+def plot_police_stations_by_barrio():
+    cases_df = crime_df.copy()
+    police_df = police_stations_df.copy()
+    cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
+    police_df = police_df.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
+    police_df = police_df.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
+    police_df = police_df.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
+    df = pd.merge(cases_df, police_df, on='ESTACION_POLICIA')
+    df = df.groupby(["ESTACION_POLICIA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
+
+    fig = px.choropleth(
+        df,
+        geojson=barrio_geojson,
+        color="ESTACION_POLICIA",
+        locations=spunit_db,
+        featureidkey="properties.NOMBRE",
+        projection="mercator",
+        labels={"ESTACION_POLICIA": "Estación", spunit_db: "Barrio"}
+    )
+    fig.update_geos(fitbounds="locations", visible=False)
     return fig
 
 
@@ -347,21 +405,21 @@ home_container = dbc.Container(
                         html.Br(),
                         html.Div([
                             html.H5(
-                                "Densidad de casos por tipo de lesión",
+                                "Densidad de casos por tipo de delito",
                                 className="tile-title"
                             ),
                             dbc.Col(
                                 dcc.Dropdown(
-                                    id="injury-type",
+                                    id="crime-type",
                                     options=[
-                                        {"label": col, "value": col} for col in all_injury_type
+                                        {"label": col, "value": col} for col in all_crime_type
                                     ],
                                     clearable=False,
                                     value=applicationconstants.all_label
                                 ),
                                 width="12",
                             ),
-                            dcc.Graph(id="injury-type-vict", style={"padding": "5px 0px 5px 17px"})
+                            dcc.Graph(id="crime-type-vict", style={"padding": "5px 0px 5px 17px"})
                         ],
                             className="panel-st-1"
                         )
@@ -377,10 +435,10 @@ home_container = dbc.Container(
                         html.Br(),
                         html.Div([
                             html.H5(
-                                "Panel 4 title",
+                                "Distribución de estaciones de policía por barrios",
                                 className="tile-title"
                             ),
-                            dcc.Graph(id="graph4")
+                            dcc.Graph(id="est-policia-barrio", figure=plot_police_stations_by_barrio())
                         ],
                         className="panel-st-1"
                         )
@@ -391,9 +449,9 @@ home_container = dbc.Container(
                         html.Br(),
                         html.Div([
                             html.H5(
-                                "Panel 5 Title",
+                                "Casos por distancia a estación de policía",
                                 className="tile-title"),
-                            dcc.Graph(id="graph5")
+                            dcc.Graph(id="police-stat-plot")
                         ],
                         className="panel-st-1"
                         )
@@ -563,7 +621,7 @@ def density_plot_transport_assailant(transport_assailant, search_clicks, year, m
         lat='LATITUD',
         lon='LONGITUD',
         z='Casos',
-        radius=10,
+        radius=20,
         center=dict(lat=7.11392, lon=-73.1198),
         zoom=11,
         mapbox_style="open-street-map",
@@ -599,7 +657,7 @@ def density_plot_gun_type_assailant(gun_type, search_clicks, year, month):
         lat='LATITUD',
         lon='LONGITUD',
         z='Casos',
-        radius=10,
+        radius=20,
         center=dict(lat=7.11392, lon=-73.1198),
         zoom=11,
         mapbox_style="open-street-map",
@@ -612,9 +670,9 @@ def density_plot_gun_type_assailant(gun_type, search_clicks, year, month):
 
 
 @app.callback(
-    Output("injury-type-vict", "figure"),
+    Output("crime-type-vict", "figure"),
     [
-     Input("injury-type", "value"),
+     Input("crime-type", "value"),
      Input("search-btn", "n_clicks")
     ],
     [
@@ -622,25 +680,25 @@ def density_plot_gun_type_assailant(gun_type, search_clicks, year, month):
      State("month", "value"),
     ],
 )
-def density_plot_injury_type_assailant(injury_type, search_clicks, year, month):
+def density_plot_crime_type(injury_type, search_clicks, year, month):
     cases_df = crime_df.copy()
-    cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
+    cases_df.loc[:, 'TIPO_DELITO'] = cases_df['TIPO_DELITO'].str.capitalize()
     cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]
     if injury_type != applicationconstants.all_label:
-        cases_df = cases_df[cases_df["TIPO_LESION"] == injury_type]
-    cases_df = cases_df.groupby(["TIPO_LESION", "LATITUD", "LONGITUD"]).size().reset_index(name="Casos")
+        cases_df = cases_df[cases_df["TIPO_DELITO"] == injury_type]
+    cases_df = cases_df.groupby(["TIPO_DELITO", "LATITUD", "LONGITUD"]).size().reset_index(name="Casos")
 
     fig = px.density_mapbox(
         cases_df,
         lat='LATITUD',
         lon='LONGITUD',
         z='Casos',
-        radius=10,
+        radius=20,
         center=dict(lat=7.11392, lon=-73.1198),
         zoom=11,
         mapbox_style="open-street-map",
-        labels={"LATITUD": "Latitud", "LONGITUD": "Longitud", "TIPO_LESION": applicationconstants.injury_type_label},
-        hover_data=["TIPO_LESION"]
+        labels={"LATITUD": "Latitud", "LONGITUD": "Longitud", "TIPO_DELITO": applicationconstants.crime_type_label},
+        hover_data=["TIPO_DELITO"]
     )
     fig.update_geos(fitbounds="locations", visible=False)
     fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})

@@ -20,10 +20,11 @@ import psycopg2
 # ################################################################################
 # Declare and define global variables
 # ################################################################################
-global crime_df         # crime database
-global barrio_geojson   # spatial units (polygons) in geojson format
-global spunit_db        # crime_df field that contains name of spatial units
-global spunit_js        # barrio_geojson field that contains name of spatial units
+global crime_df             # crime database
+global police_stations_df   # police stationsdatabase
+global barrio_geojson       # spatial units (polygons) in geojson format
+global spunit_db            # crime_df field that contains name of spatial units
+global spunit_js            # barrio_geojson field that contains name of spatial units
 
 spunit_db = "UNIDAD_ESPACIAL"
 spunit_js = "NOMBRE"
@@ -32,6 +33,7 @@ spunit_js = "NOMBRE"
 # Load and adjust default crime database (Jan 2010 - Feb 2021)
 # ################################################################################
 column_names = ['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA','DIA_SEMANA_num', 'LATITUD', 'LONGITUD', 'ZONA', 'COMUNA', 'COMUNA_num','BARRIO', 'UNIDAD_ESPACIAL', 'TIPO_DELITO_ARTICULO', 'TIPO_DELITO','TIPO_CONDUCTA', 'TIPO_LESION', 'GENERO_VICTIMA', 'EDAD_VICTIMA','GRUPO_ETARIO_VICTIMA', 'GRUPO_ETARIO_VICTIMA_num','ESTADO_CIVIL_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMA','MEDIO_TRANSPORTE_VICTIMARIO', 'TIPO_ARMA','DISTANCIA_ESTACION_POLICIA_CERCANA', 'ESTACION_POLICIA_CERCANA']
+police_est_column_names = ['NOMBRE', 'LATITUD', 'LONGITUD']
 dtypes = {"MES": "category",
           "DIA_SEMANA": "category",
           "ZONA": "category",
@@ -67,16 +69,20 @@ try:
     cursor.execute('select * from casos')
     cases = cursor.fetchall()
     crime_df = pd.DataFrame(cases, columns=column_names)
+    crime_df = crime_df.astype(dtypes)
+    cursor.execute('select * from estacion_policia')
+    police_est = cursor.fetchall()
+    police_stations_df = pd.DataFrame(police_est, columns=police_est_column_names)
 except (Exception, psycopg2.DatabaseError) as error:
     print("ERROR. Reading the data from the file then.")
     print(error)
     crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",", encoding="utf-8", dtype=dtypes, parse_dates=["FECHA"])
+    police_stations_df = pd.read_csv("data/estaciones-policia.csv", delimiter=",", encoding="utf-8")
 finally:
     if connection is not None:
         cursor.close()
         connection.close()
 
-crime_df = crime_df.astype(dtypes)
 # Adjust value order of several categorical fields
 column_dtype = pd.api.types.CategoricalDtype(categories=['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'], ordered=True)
 crime_df["MES"] = crime_df["MES"].astype(column_dtype)
