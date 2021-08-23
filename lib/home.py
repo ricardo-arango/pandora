@@ -8,7 +8,7 @@ from app import app
 from dataloading import crime_df, barrio_geojson, spunit_db, spunit_js
 from datetime import date
 from dash.dependencies import Input, Output, State
-from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal
+from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal, applicationconstants
 from lib.FeatureCard import FeatureCard
 
 # Current date time
@@ -112,7 +112,7 @@ home_container = dbc.Container(
                             dbc.Col(
                                 dbc.FormGroup(
                                     [
-                                        dbc.Label("Año:", html_for="year", width=2, className="labels-font"),
+                                        dbc.Label(applicationconstants.year_label, html_for="year", width=2, className="labels-font"),
                                         dbc.Col(
                                             dcc.Dropdown(
                                                 id="year",
@@ -120,7 +120,6 @@ home_container = dbc.Container(
                                                     {"label": col, "value": col} for col in crime_df["AÑO"].unique()
                                                 ],
                                                 clearable=False,
-                                                placeholder="Año...",
                                                 value=current_date.year
                                             ),
                                             width=10,
@@ -132,7 +131,7 @@ home_container = dbc.Container(
                             dbc.Col(
                                 dbc.FormGroup(
                                     [
-                                        dbc.Label("Mes:", html_for="month", width=2, className="labels-font"),
+                                        dbc.Label(applicationconstants.month_label, html_for="month", width=2, className="labels-font"),
                                         dbc.Col(
                                             dcc.Dropdown(
                                                 id="month",
@@ -151,7 +150,6 @@ home_container = dbc.Container(
                                                     {"label": "Diciembre", "value": 12}
                                                 ],
                                                 clearable=False,
-                                                placeholder="Mes...",
                                                 value=current_date.month
                                             ),
                                             width=10,
@@ -193,36 +191,40 @@ home_container = dbc.Container(
                                 dbc.Row(
                                 [
                                     dbc.Col([
-                                        dbc.Label("Día de la Semana:", className="labels-font labels-margin"),
+                                        dbc.Label(applicationconstants.week_day_label, className="labels-font labels-margin"),
                                         dcc.Dropdown(
                                             id="diasemana",
+                                            placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
                                                 {"label": col, "value": col} for col in crime_df["DIA_SEMANA"].str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="3"),
                                     dbc.Col([
-                                        dbc.Label("Barrio:", className="labels-font labels-margin"),
+                                        dbc.Label(applicationconstants.barrio_label, className="labels-font labels-margin"),
                                         dcc.Dropdown(
                                             id="barrio",
+                                            placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
                                                 {"label": col, "value": col} for col in crime_df["BARRIO"].str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="3"),
                                     dbc.Col([
-                                        dbc.Label("Tipo de lesión:", className="labels-font labels-margin"),
+                                        dbc.Label(applicationconstants.injury_type_label, className="labels-font labels-margin"),
                                         dcc.Dropdown(
                                             id="tipolesion",
+                                            placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
                                                 {"label": col, "value": col} for col in crime_df["TIPO_LESION"].str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="3"),
                                     dbc.Col([
-                                        dbc.Label("Grupo etario víctima:", className="labels-font labels-margin"),
+                                        dbc.Label(applicationconstants.age_group_label, className="labels-font labels-margin"),
                                         dcc.Dropdown(
                                             id="grupoetario",
+                                            placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
                                                 {"label": col, "value": col} for col in crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
                                             ]
@@ -236,7 +238,7 @@ home_container = dbc.Container(
                                         value=[0],
                                         switch=True,
                                         options=[
-                                            {"label": "Mostrar por día de la semana", "value": 1}
+                                            {"label": applicationconstants.show_week_day_label, "value": 1}
                                         ],
                                         className="toggle-font"
                                     ),

@@ -6,9 +6,11 @@ import plotly.express as px
 from dataloading import crime_df, barrio_geojson, spunit_db, spunit_js
 from app import app
 from dash.dependencies import Input, Output
+from lib import applicationconstants
 
 allYears = "Todos"
 yearDropdownOptions = np.append([allYears], crime_df["AÑO"].unique())
+
 
 modal_instance = dbc.Modal(
     [
@@ -25,7 +27,7 @@ modal_instance = dbc.Modal(
                                     dbc.Row(
                                         [
                                             dbc.Col([
-                                                dbc.Label("Año:", className="labels-font labels-margin"),
+                                                dbc.Label(applicationconstants.year_label, className="labels-font labels-margin"),
                                                 dcc.Dropdown(
                                                     id="nondeadly-year",
                                                     options=[
@@ -36,27 +38,30 @@ modal_instance = dbc.Modal(
                                                 ),
                                             ], width="3"),
                                             dbc.Col([
-                                                dbc.Label("Día de la Semana:", className="labels-font labels-margin"),
+                                                dbc.Label(applicationconstants.week_day_label, className="labels-font labels-margin"),
                                                 dcc.Dropdown(
                                                     id="nondeadly-diasemana",
+                                                    placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
                                                         {"label": col, "value": col} for col in crime_df["DIA_SEMANA"].str.capitalize().unique()
-                                                    ]
+                                                    ],
                                                 ),
                                             ], width="3"),
                                             dbc.Col([
-                                                dbc.Label("Barrio:", className="labels-font labels-margin"),
+                                                dbc.Label(applicationconstants.barrio_label, className="labels-font labels-margin"),
                                                 dcc.Dropdown(
                                                     id="nondeadly-barrio",
+                                                    placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
                                                         {"label": col, "value": col} for col in crime_df["BARRIO"].str.capitalize().unique()
-                                                    ]
+                                                    ],
                                                 ),
                                             ], width="3"),
                                             dbc.Col([
-                                                dbc.Label("Grupo etario víctima:", className="labels-font labels-margin"),
+                                                dbc.Label(applicationconstants.age_group_label, className="labels-font labels-margin"),
                                                 dcc.Dropdown(
                                                     id="nondeadly-grupoetario",
+                                                    placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
                                                         {"label": col, "value": col} for col in crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
                                                     ]
@@ -70,7 +75,7 @@ modal_instance = dbc.Modal(
                                             value=[0],
                                             switch=True,
                                             options=[
-                                                {"label": "Mostrar por día de la semana", "value": 1}
+                                                {"label": applicationconstants.show_week_day_label, "value": 1}
                                             ],
                                             className="toggle-font"
                                         ),

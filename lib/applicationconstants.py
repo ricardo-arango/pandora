@@ -1,0 +1,8 @@
+dropdown_placeholder = "Seleccionar..."
+show_week_day_label = "Mostrar por día de la semana"
+year_label = "Año:"
+month_label = "Mes:"
+week_day_label = "Día de la semana:"
+barrio_label = "Barrio:"
+age_group_label = "Grupo etário víctima:"
+injury_type_label = "Tipo de lesión:"
