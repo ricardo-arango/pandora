@@ -117,18 +117,7 @@ home_container = dbc.Container(
                                             dcc.Dropdown(
                                                 id="year",
                                                 options=[
-                                                    {"label": "2010", "value": 2010},
-                                                    {"label": "2011", "value": 2011},
-                                                    {"label": "2012", "value": 2012},
-                                                    {"label": "2013", "value": 2013},
-                                                    {"label": "2014", "value": 2014},
-                                                    {"label": "2015", "value": 2015},
-                                                    {"label": "2016", "value": 2016},
-                                                    {"label": "2017", "value": 2017},
-                                                    {"label": "2018", "value": 2018},
-                                                    {"label": "2019", "value": 2019},
-                                                    {"label": "2020", "value": 2020},
-                                                    {"label": "2021", "value": 2021}
+                                                    {"label": col, "value": col} for col in crime_df["AÑO"].unique()
                                                 ],
                                                 clearable=False,
                                                 placeholder="Año...",
@@ -159,7 +148,7 @@ home_container = dbc.Container(
                                                     {"label": "Septiembre", "value": 9},
                                                     {"label": "Octubre", "value": 10},
                                                     {"label": "Noviembre", "value": 11},
-                                                    {"label": "Diciembre", "value": 12, "disabled": True}
+                                                    {"label": "Diciembre", "value": 12}
                                                 ],
                                                 clearable=False,
                                                 placeholder="Mes...",
@@ -559,7 +548,6 @@ def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, most
     cases_df['GRUPO_ETARIO_VICTIMA'] = cases_df['GRUPO_ETARIO_VICTIMA'].str.capitalize()
     if barrio:
         cases_df = cases_df[cases_df[spunit_db] == barrio]
-        print(len(cases_df))
     if tipo_lesion:
         cases_df = cases_df[cases_df["TIPO_LESION"] == tipo_lesion]
     if dia_semana:
