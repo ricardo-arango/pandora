@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import plotly.express as px
 import pandas as pd
+import numpy as np
 
 from app import app
 from dataloading import crime_df, barrio_geojson, spunit_db, spunit_js
@@ -11,9 +12,11 @@ from dash.dependencies import Input, Output, State
 from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal, applicationconstants
 from lib.FeatureCard import FeatureCard
 
-# Current date time
 current_date = date.today()
 current_year = current_date.year
+all_trasportation_assailant = np.append([applicationconstants.all_label], crime_df["MEDIO_TRANSPORTE_VICTIMARIO"].str.capitalize().unique())
+all_gun_type = np.append([applicationconstants.all_label], crime_df["TIPO_ARMA"].str.capitalize().unique())
+all_injury_type = np.append([applicationconstants.all_label], crime_df["TIPO_LESION"].str.capitalize().unique())
 
 # Cards
 femicides_card = FeatureCard("Feminicidios", 0, 0, False, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card()
@@ -30,12 +33,15 @@ personalinjury_card = FeatureCard("Lesiones personales", 0, 0, False, "fas fa-cr
 @app.callback(
     Output("barplot-barrio", "figure"),
     Input("search-btn", "n_clicks"),
-    State("year", "value"),
+    [
+        State("year", "value"),
+        State("month", "value"),
+    ]
 )
-def get_top_ten_barrios_graph(search_btn_clicks, year):
+def get_top_ten_barrios_graph(search_btn_clicks, year, month):
     global current_year
     current_year = year
-    cases_df = crime_df[crime_df["AÑO"] == current_year]
+    cases_df = crime_df[(crime_df["AÑO"] == current_year) & (crime_df["MES_num"] == month)]
     cases_df[spunit_db] = cases_df[spunit_db].str.capitalize()
     barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
     barrio_cn = barrio_cn.sort_values(by="casos", ascending=False).head(10)
@@ -46,7 +52,7 @@ def get_top_ten_barrios_graph(search_btn_clicks, year):
         y=spunit_db,
         color='casos',
         color_continuous_scale=px.colors.sequential.Blues,
-        labels={"casos": "Casos {}".format(year), spunit_db: "Unidad Espacial"}
+        labels={"casos": "Casos", spunit_db: "Unidad Espacial"}
     )
     bar_plot.update_traces(
         marker_line_color='rgb(8,48,107)',
@@ -75,7 +81,7 @@ def map_plot_cases(search_btn_clicks, year):
         color_continuous_scale=px.colors.sequential.Blues,
         locations=spunit_db, featureidkey="properties."+spunit_js,
         projection="mercator",
-        labels={"casos": "Casos {}".format(year)}
+        labels={"casos": "Casos {}".format(year)},
     )
     fig.update_layout(
         font_family="revert",
@@ -150,7 +156,7 @@ home_container = dbc.Container(
                                                     {"label": "Diciembre", "value": 12}
                                                 ],
                                                 clearable=False,
-                                                value=current_date.month
+                                                value=2
                                             ),
                                             width=10,
                                         ),
@@ -314,10 +320,21 @@ home_container = dbc.Container(
                         html.Br(),
                         html.Div([
                             html.H5(
-                                "Panel 1 title",
+                                "Densidad de casos por medio de transporte victimario",
                                 className="tile-title"
                             ),
-                            dcc.Graph(id="graph1")
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id="trasport-vict",
+                                    options=[
+                                        {"label": col, "value": col} for col in all_trasportation_assailant
+                                    ],
+                                    clearable=False,
+                                    value=applicationconstants.all_label
+                                ),
+                                width="12",
+                            ),
+                            dcc.Graph(id="trasp_assailant", style={"padding": "5px 0px 5px 17px"})
                         ],
                         style={
                             "border": "1px solid lightgrey",
@@ -336,19 +353,31 @@ home_container = dbc.Container(
                         html.Br(),
                         html.Div([
                             html.H5(
-                                "Panel 2 Title",
-                                className="tile-title"),
-                            dcc.Graph(id="graph2")
+                                "Densidad de casos por tipo de arma",
+                                className="tile-title"
+                            ),
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id="gun-type",
+                                    options=[
+                                        {"label": col, "value": col} for col in all_gun_type
+                                    ],
+                                    clearable=False,
+                                    value=applicationconstants.all_label
+                                ),
+                                width="12",
+                            ),
+                            dcc.Graph(id="gun-type-vict", style={"padding": "5px 0px 5px 17px"})
                         ],
-                        style={
-                            "border": "1px solid lightgrey",
-                            "width": "100%",
-                            "height": "100%",
-                            "margin": "5px",
-                            "padding-right": "5px",
-                            "background": "white",
-                            "border-radius": "10px"
-                        }
+                            style={
+                                "border": "1px solid lightgrey",
+                                "width": "100%",
+                                "height": "100%",
+                                "margin": "5px",
+                                "padding-right": "5px",
+                                "background": "white",
+                                "border-radius": "10px"
+                            }
                         )
                     ], width="4"
                 ),
@@ -357,19 +386,31 @@ home_container = dbc.Container(
                         html.Br(),
                         html.Div([
                             html.H5(
-                                "Panel 3 Title",
-                                className="tile-title"),
-                            dcc.Graph(id="graph3")
+                                "Densidad de casos por tipo de lesión",
+                                className="tile-title"
+                            ),
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id="injury-type",
+                                    options=[
+                                        {"label": col, "value": col} for col in all_injury_type
+                                    ],
+                                    clearable=False,
+                                    value=applicationconstants.all_label
+                                ),
+                                width="12",
+                            ),
+                            dcc.Graph(id="injury-type-vict", style={"padding": "5px 0px 5px 17px"})
                         ],
-                        style={
-                            "border": "1px solid lightgrey",
-                            "width": "100%",
-                            "height": "100%",
-                            "margin": "5px",
-                            "padding-right": "5px",
-                            "background": "white",
-                            "border-radius": "10px"
-                        }
+                            style={
+                                "border": "1px solid lightgrey",
+                                "width": "100%",
+                                "height": "100%",
+                                "margin": "5px",
+                                "padding-right": "5px",
+                                "background": "white",
+                                "border-radius": "10px"
+                            }
                         )
                     ], width="4"
                 )
@@ -501,19 +542,16 @@ def refresh_dashboard_by_date(search_clicks, year, month):
     h_personas_count, h_personas_diff, h_personas_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "HURTO A PERSONAS")
     homicide_count, homicide_diff, homicide_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "HOMICIDIO")
     sexharassment_count, sexharassment_diff, sexharassment_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "ACOSO SEXUAL")
-    if search_clicks > 0:
-        f = FeatureCard("Femicides", femicides_count, femicides_diff, femicides_increased, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card(),
-        vs = FeatureCard("Violencia sexual", sexualviolence_count, sexualviolence_diff, sexualviolence_increase, "fas fa-venus fa-2x", "venus", "0 0 0 11px", sexviolencemodal.modal_instance).create_card(),
-        lf = FeatureCard("Lesiones fatales", deadly_count, deadly_diff, deadly_increase, "fas fa-dizzy fa-2x", "dizzy", "1px 5px", deadlyinjuriesmodal.modal_instance).create_card(),
-        lnf = FeatureCard("Lesiones no fatales", nondeadly_count, nondeadly_diff, nondeadly_increase, "fas fa-user-injured fa-2x", "user-injured", "0 0 0 6px", nondeadlyinjuriesmodal.modal_instance).create_card(),
-        hp = FeatureCard("Hurto a personas",  h_personas_count, h_personas_diff, h_personas_increase, "fas fa-mask fa-2x", "mask", "0px", theftpeoplemodal.modal_instance).create_card(),
-        hr = FeatureCard("Hurto a residencias", h_residence_count, h_residence_diff, h_residence_increase, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", theftresidencemodal.modal_instance).create_card(),
-        vg = FeatureCard("Acoso sexual", sexharassment_count, sexharassment_diff, sexharassment_increase, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", sexharassmentmodal.modal_instance).create_card(),
-        h = FeatureCard("Homicidio", homicide_count, homicide_diff, homicide_increase, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card(),
-        lp = FeatureCard("Lesiones personales", p_injuries_count, p_injuries_diff, p_injuries_increase, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", personalinjurymodal.modal_instance).create_card(),
-        return f, vs, lf, lnf, hp, hr, vg, h, lp
-    return femicides_card, sexualviolence_card, deadlyinjury_card, nondeadlyinjury_card, theftpeople_card, \
-           theftresidence_card, sexharassment__card, homicide_card, personalinjury_card
+    f = FeatureCard("Femicides", femicides_count, femicides_diff, femicides_increased, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card(),
+    vs = FeatureCard("Violencia sexual", sexualviolence_count, sexualviolence_diff, sexualviolence_increase, "fas fa-venus fa-2x", "venus", "0 0 0 11px", sexviolencemodal.modal_instance).create_card(),
+    lf = FeatureCard("Lesiones fatales", deadly_count, deadly_diff, deadly_increase, "fas fa-dizzy fa-2x", "dizzy", "1px 5px", deadlyinjuriesmodal.modal_instance).create_card(),
+    lnf = FeatureCard("Lesiones no fatales", nondeadly_count, nondeadly_diff, nondeadly_increase, "fas fa-user-injured fa-2x", "user-injured", "0 0 0 6px", nondeadlyinjuriesmodal.modal_instance).create_card(),
+    hp = FeatureCard("Hurto a personas",  h_personas_count, h_personas_diff, h_personas_increase, "fas fa-mask fa-2x", "mask", "0px", theftpeoplemodal.modal_instance).create_card(),
+    hr = FeatureCard("Hurto a residencias", h_residence_count, h_residence_diff, h_residence_increase, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", theftresidencemodal.modal_instance).create_card(),
+    vg = FeatureCard("Acoso sexual", sexharassment_count, sexharassment_diff, sexharassment_increase, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", sexharassmentmodal.modal_instance).create_card(),
+    h = FeatureCard("Homicidio", homicide_count, homicide_diff, homicide_increase, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card(),
+    lp = FeatureCard("Lesiones personales", p_injuries_count, p_injuries_diff, p_injuries_increase, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", personalinjurymodal.modal_instance).create_card(),
+    return f, vs, lf, lnf, hp, hr, vg, h, lp
 
 
 def get_card_info(cases_df, cases_before_df, column, value):
@@ -586,3 +624,113 @@ def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, most
     barplot_all_years.update_xaxes(dtick="FECHA", ticklabelmode="period")
     barplot_all_years.update_layout(paper_bgcolor="white")
     return barplot_all_years
+
+
+@app.callback(
+    Output("trasp_assailant", "figure"),
+    [
+     Input("trasport-vict", "value")
+    ],
+    [
+     State("year", "value"),
+     State("month", "value"),
+    ],
+)
+def density_plot_transport_assailant(transport_assailant, year, month):
+    cases_df = crime_df.copy()
+    cases_df.loc[:, 'MEDIO_TRANSPORTE_VICTIMARIO'] = cases_df['MEDIO_TRANSPORTE_VICTIMARIO'].str.capitalize()
+    cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]
+    if not transport_assailant == applicationconstants.all_label:
+        cases_df = cases_df[cases_df["MEDIO_TRANSPORTE_VICTIMARIO"] == transport_assailant]
+
+    cases_df = cases_df.groupby(["MEDIO_TRANSPORTE_VICTIMARIO", "LATITUD", "LONGITUD"]).size().reset_index(name="Casos")
+
+    fig = px.density_mapbox(
+        cases_df,
+        lat='LATITUD',
+        lon='LONGITUD',
+        z='Casos',
+        radius=10,
+        center=dict(lat=7.11392, lon=-73.1198),
+        zoom=11,
+        mapbox_style="open-street-map",
+        labels={"LATITUD": "Latitud", "LONGITUD": "Longitud", "MEDIO_TRANSPORTE_VICTIMARIO": applicationconstants.trasportation_assailant},
+        hover_data=["MEDIO_TRANSPORTE_VICTIMARIO"]
+    )
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    return fig
+
+@app.callback(
+    Output("gun-type-vict", "figure"),
+    [
+     Input("gun-type", "value"),
+     Input("search-btn", "n_clicks")
+    ],
+    [
+     State("year", "value"),
+     State("month", "value"),
+    ],
+)
+def density_plot_gun_type_assailant(gun_type, search_clicks, year, month):
+    cases_df = crime_df.copy()
+    cases_df.loc[:, 'TIPO_ARMA'] = cases_df['TIPO_ARMA'].str.capitalize()
+    cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]
+    if not gun_type == applicationconstants.all_label:
+        cases_df = cases_df[cases_df["TIPO_ARMA"] == gun_type]
+
+    cases_df = cases_df.groupby(["TIPO_ARMA", "LATITUD", "LONGITUD"]).size().reset_index(name="Casos")
+
+    fig = px.density_mapbox(
+        cases_df,
+        lat='LATITUD',
+        lon='LONGITUD',
+        z='Casos',
+        radius=10,
+        center=dict(lat=7.11392, lon=-73.1198),
+        zoom=11,
+        mapbox_style="open-street-map",
+        labels={"LATITUD": "Latitud", "LONGITUD": "Longitud", "TIPO_ARMA": applicationconstants.gun_type_assailant},
+        hover_data=["TIPO_ARMA"]
+    )
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    return fig
+
+
+@app.callback(
+    Output("injury-type-vict", "figure"),
+    [
+     Input("injury-type", "value"),
+     Input("search-btn", "n_clicks")
+    ],
+    [
+     State("year", "value"),
+     State("month", "value"),
+    ],
+)
+def density_plot_injury_type_assailant(injury_type, search_clicks, year, month):
+    cases_df = crime_df.copy()
+    cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
+    cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]
+    print(injury_type)
+    if injury_type != applicationconstants.all_label:
+        cases_df = cases_df[cases_df["TIPO_LESION"] == injury_type]
+    print(len(cases_df))
+    cases_df = cases_df.groupby(["TIPO_LESION", "LATITUD", "LONGITUD"]).size().reset_index(name="Casos")
+
+    fig = px.density_mapbox(
+        cases_df,
+        lat='LATITUD',
+        lon='LONGITUD',
+        z='Casos',
+        radius=10,
+        center=dict(lat=7.11392, lon=-73.1198),
+        zoom=11,
+        mapbox_style="open-street-map",
+        labels={"LATITUD": "Latitud", "LONGITUD": "Longitud", "TIPO_LESION": applicationconstants.injury_type_label},
+        hover_data=["TIPO_LESION"]
+    )
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    return fig

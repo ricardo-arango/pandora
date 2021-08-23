@@ -8,7 +8,7 @@ from app import app
 from dash.dependencies import Input, Output
 from lib import applicationconstants
 
-allYears = "Todos"
+allYears = applicationconstants.all_label
 yearDropdownOptions = np.append([allYears], crime_df["AÑO"].unique())
 
 
