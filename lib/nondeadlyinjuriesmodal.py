@@ -30,7 +30,9 @@ modal_instance = dbc.Modal(
                                                     id="nondeadly-year",
                                                     options=[
                                                         {"label": col, "value": col} for col in yearDropdownOptions
-                                                    ]
+                                                    ],
+                                                    value=allYears,
+                                                    clearable=False
                                                 ),
                                             ], width="3"),
                                             dbc.Col([
