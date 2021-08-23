@@ -42,7 +42,7 @@ def get_top_ten_barrios_graph(search_btn_clicks, year, month):
     global current_year
     current_year = year
     cases_df = crime_df[(crime_df["AÑO"] == current_year) & (crime_df["MES_num"] == month)]
-    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.capitalize()
+    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
     barrio_cn = barrio_cn.sort_values(by="casos", ascending=False).head(10)
     barrio_cn = barrio_cn.sort_values(by="casos")
@@ -103,8 +103,8 @@ def get_cases_by_police_station(search_btn_clicks, year, month):
     global current_year
     current_year = year
     cases_df = crime_df[(crime_df["AÑO"] == current_year) & (crime_df["MES_num"] == month)]
-    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.capitalize()
-    cases_df.loc[:, "ESTACION_POLICIA_CERCANA"] = cases_df["ESTACION_POLICIA_CERCANA"].str.capitalize()
+    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
+    cases_df.loc[:, "ESTACION_POLICIA_CERCANA"] = cases_df["ESTACION_POLICIA_CERCANA"].str.title()
     cases_df = cases_df.groupby(["ESTACION_POLICIA_CERCANA"])["CRIMEN_ID"].count().reset_index(name="Casos")
     cases_df = cases_df.sort_values(by="Casos", ascending=False)
 
@@ -270,7 +270,7 @@ home_container = dbc.Container(
                                             id="barrio",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in crime_df["BARRIO"].str.capitalize().unique()
+                                                {"label": col, "value": col} for col in crime_df["BARRIO"].str.title().unique()
                                             ]
                                         ),
                                     ], width="3"),
@@ -552,7 +552,7 @@ def get_card_info(cases_df, cases_before_df, column, value):
 )
 def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, mostrar_por_dia_semana):
     cases_df = crime_df.copy()
-    cases_df[spunit_db] = cases_df[spunit_db].str.capitalize()
+    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     cases_df.loc[:, 'DIA_SEMANA'] = cases_df['DIA_SEMANA'].str.capitalize()
     cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
     cases_df['GRUPO_ETARIO_VICTIMA'] = cases_df['GRUPO_ETARIO_VICTIMA'].str.capitalize()

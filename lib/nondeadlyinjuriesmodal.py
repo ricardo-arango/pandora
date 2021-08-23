@@ -53,7 +53,7 @@ modal_instance = dbc.Modal(
                                                     id="nondeadly-barrio",
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
-                                                        {"label": col, "value": col} for col in crime_df["BARRIO"].str.capitalize().unique()
+                                                        {"label": col, "value": col} for col in crime_df["BARRIO"].str.title().unique()
                                                     ],
                                                 ),
                                             ], width="3"),
@@ -122,7 +122,7 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
     if year != allYears:
         cases_df = cases_df[cases_df["AÑO"] == int(year)]
 
-    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.capitalize()
+    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     cases_df.loc[:, 'DIA_SEMANA'] = cases_df['DIA_SEMANA'].str.capitalize()
     cases_df.loc[:, 'TIPO_DELITO'] = cases_df['TIPO_DELITO'].str.capitalize()
     cases_df.loc[:, 'TIPO_CONDUCTA'] = cases_df['TIPO_CONDUCTA'].str.capitalize()
