@@ -81,7 +81,7 @@ def map_plot_cases(search_btn_clicks, year):
         color_continuous_scale=px.colors.sequential.Blues,
         locations=spunit_db, featureidkey="properties."+spunit_js,
         projection="mercator",
-        labels={"casos": "Casos {}".format(year)},
+        labels={"casos": "Casos"},
     )
     fig.update_layout(
         font_family="revert",
