@@ -52,7 +52,7 @@ def get_top_ten_barrios_graph(search_btn_clicks, year, month):
         y=spunit_db,
         color='casos',
         color_continuous_scale=px.colors.sequential.Blues,
-        labels={"casos": "Casos", spunit_db: "Unidad Espacial"}
+        labels={"casos": "Casos", spunit_db: "Barrio"}
     )
     bar_plot.update_traces(
         marker_line_color='rgb(8,48,107)',
@@ -541,14 +541,15 @@ def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, most
 @app.callback(
     Output("trasp_assailant", "figure"),
     [
-     Input("trasport-vict", "value")
+     Input("trasport-vict", "value"),
+     Input("search-btn", "n_clicks")
     ],
     [
      State("year", "value"),
      State("month", "value"),
     ],
 )
-def density_plot_transport_assailant(transport_assailant, year, month):
+def density_plot_transport_assailant(transport_assailant, search_clicks, year, month):
     cases_df = crime_df.copy()
     cases_df.loc[:, 'MEDIO_TRANSPORTE_VICTIMARIO'] = cases_df['MEDIO_TRANSPORTE_VICTIMARIO'].str.capitalize()
     cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]

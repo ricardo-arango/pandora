@@ -17,7 +17,7 @@ tabs_container = dbc.Container(
     [
         dbc.Tabs(
             [
-                dbc.Tab(label="Mapa Folium", tab_id="mapfolium"),
+                # dbc.Tab(label="Mapa Folium", tab_id="mapfolium"),
                 dbc.Tab(label="Mapa Plotly", tab_id="mapplotly"),
                 dbc.Tab(label="Línea", tab_id="line"),
                 dbc.Tab(label="Barras", tab_id="barplot"),
@@ -25,7 +25,7 @@ tabs_container = dbc.Container(
                 dbc.Tab(label="Histogramas", tab_id="histogram"),
             ],
             id="tabs",
-            active_tab="mapfolium",
+            active_tab="mapplotly",
         ),
         html.Div(id="tab-content", className="p-4"),
     ],
@@ -460,16 +460,7 @@ def line_plot_monthly_cases_by_year(year, diaSemana, barrio, tipoLesion, tipoDel
     return linePlot
 
 
-@app.callback(
-    Output("polygondiv", "children"),
-    [
-        Input("map-fol-year", "value"),
-        Input("map-fol-barrio", "value"),
-        Input("map-fol-tipolesion", "value"),
-        Input("map-fol-tipodelito", "value"),
-        Input("map-fol-grupoetario", "value")
-    ],
-)
+
 def map_plot_cases(year, barrio, tipoLesion, tipoDelito, grupoEtario):
     if not year:
         year = 2010

@@ -6,7 +6,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
 from app import app
-from lib import sidebar, content, graphics, navbar, home
+from lib import sidebar, content, graphics, navbar, home, predictions, tools, about
 
 # ################################################################################
 # XXXXXXX
@@ -26,22 +26,16 @@ app.layout = html.Div([dcc.Location(id="url"), navbar.navbar, sidebar.sidebar, c
 def render_page_content(pathname):
     if pathname == "/" or pathname == "":
         return home.home_container
-    elif pathname == "/graficas":
+    elif pathname == "/predictions":
+        return predictions.predictions_container
+    elif pathname == "/tools":
+        return tools.tools_container
+    elif pathname == "/about":
+        return about.about_container
+    elif pathname == "/charts":
         return graphics.tabs_container
-    elif pathname == "/reportes":
-        return profile_data
-    elif pathname == "/resumen":
-        return html.H2("Resumen")
     else:
         return home.home_container
-        # If the user tries to reach a different page, return a 404 message
-#         return dbc.Jumbotron(
-#             [
-#                 html.H1("404: Not found", className="text-danger"),
-#                 html.Hr(),
-#                 html.P(f"La URL {pathname} no existe."),
-#             ]
-#         )
 
 
 # add callback for toggling the collapse on small screens

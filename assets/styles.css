@@ -7,17 +7,16 @@
     top: 3.5rem;
     left: 0;
     bottom: 0;
-    width: 7.2rem;
-    height: 200.5rem;
+    width: 8rem;
+    height: 139.7rem;
     box-shadow: 2px 2px 2px 1px rgba(168, 168, 173, 0.32);
 }
 
 .content {
-    margin-left: 7.4rem;
-    padding: 0.5rem 1rem;
-    height: 66rem;
+    margin-left: 7.9rem;
+    padding: 0.5rem 1rem 0 0;
     background: #f8f9fa;
-    height: 200.5rem;
+    height: 140.5rem;
 }
 
 .tabscontainer {
@@ -122,4 +121,9 @@
     margin: -4px;
     background: white;
     border-radius: 10px;
+}
+.panel-title {
+    font-family: revert;
+    color: #5f5f5f;
+    margin-left: 5px
 }
