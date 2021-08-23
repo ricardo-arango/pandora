@@ -251,14 +251,7 @@ home_container = dbc.Container(
                                     style={"padding-left": "16px", "margin": "-27px 0"}
                                 ),
                             ],
-                            style={
-                                "border": "1px solid lightgrey",
-                                "width": "100.8%",
-                                "height": "100%",
-                                "margin": "-4px",
-                                "background": "white",
-                                "border-radius": "10px"
-                            }
+                            className="panel-st-2"
                         )
                     ],
                     width="7"
@@ -277,15 +270,7 @@ home_container = dbc.Container(
                             ),
                             dcc.Graph(id="barplot-barrio")
                         ],
-                        style={
-                            "border": "1px solid lightgrey",
-                            "width": "100%",
-                            "height": "100%",
-                            "margin": "5px",
-                            "padding-right": "5px",
-                            "background": "white",
-                            "border-radius": "10px"
-                        }
+                        className="panel-st-1"
                         )
                     ], width="7"
                 ),
@@ -298,15 +283,7 @@ home_container = dbc.Container(
                                 className="tile-title"),
                             dcc.Graph(id="map-plot")
                         ],
-                        style={
-                            "border": "1px solid lightgrey",
-                            "width": "100%",
-                            "height": "100%",
-                            "margin": "5px",
-                            "padding-right": "5px",
-                            "background": "white",
-                            "border-radius": "10px"
-                        }
+                        className="panel-st-1"
                         )
                     ], width="5"
                 )
@@ -336,15 +313,7 @@ home_container = dbc.Container(
                             ),
                             dcc.Graph(id="trasp_assailant", style={"padding": "5px 0px 5px 17px"})
                         ],
-                        style={
-                            "border": "1px solid lightgrey",
-                            "width": "100%",
-                            "height": "100%",
-                            "margin": "5px",
-                            "padding-right": "5px",
-                            "background": "white",
-                            "border-radius": "10px"
-                        }
+                        className="panel-st-1"
                         )
                     ], width="4"
                 ),
@@ -369,15 +338,7 @@ home_container = dbc.Container(
                             ),
                             dcc.Graph(id="gun-type-vict", style={"padding": "5px 0px 5px 17px"})
                         ],
-                            style={
-                                "border": "1px solid lightgrey",
-                                "width": "100%",
-                                "height": "100%",
-                                "margin": "5px",
-                                "padding-right": "5px",
-                                "background": "white",
-                                "border-radius": "10px"
-                            }
+                            className="panel-st-1"
                         )
                     ], width="4"
                 ),
@@ -402,15 +363,7 @@ home_container = dbc.Container(
                             ),
                             dcc.Graph(id="injury-type-vict", style={"padding": "5px 0px 5px 17px"})
                         ],
-                            style={
-                                "border": "1px solid lightgrey",
-                                "width": "100%",
-                                "height": "100%",
-                                "margin": "5px",
-                                "padding-right": "5px",
-                                "background": "white",
-                                "border-radius": "10px"
-                            }
+                            className="panel-st-1"
                         )
                     ], width="4"
                 )
@@ -429,15 +382,7 @@ home_container = dbc.Container(
                             ),
                             dcc.Graph(id="graph4")
                         ],
-                        style={
-                            "border": "1px solid lightgrey",
-                            "width": "100%",
-                            "height": "100%",
-                            "margin": "5px",
-                            "padding-right": "5px",
-                            "background": "white",
-                            "border-radius": "10px"
-                        }
+                        className="panel-st-1"
                         )
                     ], width="5"
                 ),
@@ -450,15 +395,7 @@ home_container = dbc.Container(
                                 className="tile-title"),
                             dcc.Graph(id="graph5")
                         ],
-                        style={
-                            "border": "1px solid lightgrey",
-                            "width": "100%",
-                            "height": "100%",
-                            "margin": "5px",
-                            "padding-right": "5px",
-                            "background": "white",
-                            "border-radius": "10px"
-                        }
+                        className="panel-st-1"
                         )
                     ], width="7"
                 )
@@ -471,31 +408,6 @@ home_container = dbc.Container(
         "background": "#f8f9fa"
     }
 )
-
-# @app.callback(
-#     [
-#         Output("number-cases-count", "children"),
-#         Output("number-cases-arrow", "className"),
-#         Output("number-cases-diff", "children"),
-#         Output("number-cases-diff", "className"),
-#     ],
-#     [
-#         Input("year", "value"),
-#         Input("month", "value"),
-#         Input("search-btn", "n_clicks")
-#      ],
-# )
-# def refresh_dashboard_by_date(year, month, search_clicks):
-#     number_cases_count = 5
-#     number_cases_arrow_class = "fas fa-arrow-up card_arrow_up"
-#     number_cases_diff_number = 2
-#     number_cases_diff_class = "card_arrow_up"
-#     if search_clicks > 0:
-#         number_cases_count = 2
-#         number_cases_arrow_class = "fas fa-arrow-down card_arrow_down"
-#         number_cases_diff_number = 3
-#         number_cases_diff_class = "card_arrow_down"
-#     return number_cases_count, number_cases_arrow_class, number_cases_diff_number, number_cases_diff_class
 
 
 @app.callback(
@@ -713,10 +625,8 @@ def density_plot_injury_type_assailant(injury_type, search_clicks, year, month):
     cases_df = crime_df.copy()
     cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
     cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]
-    print(injury_type)
     if injury_type != applicationconstants.all_label:
         cases_df = cases_df[cases_df["TIPO_LESION"] == injury_type]
-    print(len(cases_df))
     cases_df = cases_df.groupby(["TIPO_LESION", "LATITUD", "LONGITUD"]).size().reset_index(name="Casos")
 
     fig = px.density_mapbox(
