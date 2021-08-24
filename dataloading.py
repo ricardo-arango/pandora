@@ -33,7 +33,7 @@ spunit_js = "NOMBRE"
 # Load spatial data
 # ################################################################################
 barrio_geojson = geopandas.read_file("data/Barrio_Comuna_Corregimiento.geojson")
-police_geojson = geopandas.read_file("data/Estaciones_policia.geojson")
+#police_geojson = geopandas.read_file("data/Estaciones_policia.geojson") #Do not delete line | work in progress
 
 # ################################################################################
 # Load and adjust default crime database (Jan 2010 - Feb 2021)
@@ -41,19 +41,18 @@ police_geojson = geopandas.read_file("data/Estaciones_policia.geojson")
 crime_df_columns = ['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA', 'DIA_SEMANA_num', 'LATITUD', 'LONGITUD', 'ZONA', 'COMUNA', 'COMUNA_num', 'BARRIO', 'UNIDAD_ESPACIAL', 'TIPO_DELITO_ARTICULO', 'TIPO_DELITO', 'TIPO_CONDUCTA', 'TIPO_LESION', 'GENERO_VICTIMA', 'EDAD_VICTIMA', 'GRUPO_ETARIO_VICTIMA', 'GRUPO_ETARIO_VICTIMA_num', 'ESTADO_CIVIL_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMARIO', 'TIPO_ARMA', 'DISTANCIA_ESTACION_POLICIA_CERCANA', 'ESTACION_POLICIA_CERCANA']
 police_df_columns = ['NOMBRE', 'LATITUD', 'LONGITUD']
 
-dtypes = {
-              #"CRIMEN_ID": "int64",
-              #"AÑO": "int64",
+dtypes = {"CRIMEN_ID": "int64",
+              "AÑO": "int64",
               "MES": "category",
-              #"MES_num": "int64",
-              #"DIA": "int64",
+              "MES_num": "int64",
+              "DIA": "int64",
               "DIA_SEMANA": "category",
-              #"DIA_SEMANA_num": "int64",
+              "DIA_SEMANA_num": "int64",
               "LATITUD": "float64",
               "LONGITUD": "float64",
               "ZONA": "category",
               "COMUNA": "category",
-              #"COMUNA_num": "int64",
+              #"COMUNA_num": "int64", #Generates an error. It may be associated with the sql db setup
               "BARRIO": "category",
               "UNIDAD_ESPACIAL": "category",
               "TIPO_DELITO_ARTICULO": "category",
@@ -61,9 +60,9 @@ dtypes = {
               "TIPO_CONDUCTA": "category",
               "TIPO_LESION": "category",
               "GENERO_VICTIMA": "category",
-              #"EDAD_VICTIMA": "int64",
+              #"EDAD_VICTIMA": "int64", #Generates an error. It may be associated with the sql db setup
               "GRUPO_ETARIO_VICTIMA": "category",
-              #"GRUPO_ETARIO_VICTIMA_num": "int64",
+              "GRUPO_ETARIO_VICTIMA_num": "int64",
               "ESTADO_CIVIL_VICTIMA": "category",
               "MEDIO_TRANSPORTE_VICTIMA": "category",
               "MEDIO_TRANSPORTE_VICTIMARIO": "category",
@@ -82,14 +81,12 @@ try:
     )
     cursor = connection.cursor()
     cursor.execute('select * from casos')
-    #cases = cursor.fetchall()
     crime_df = pd.DataFrame(cursor.fetchall(), columns=crime_df_columns)
     crime_df = crime_df.astype(dtypes)
     cursor.execute('select * from estacion_policia')
-    #police_est = cursor.fetchall()
     police_df = pd.DataFrame(cursor.fetchall(), columns=police_df_columns)
 except (Exception, psycopg2.DatabaseError) as error:
-    print("Error retrieving data from server: reading data from backup file.")
+    print("Error retrieving data from server: reading data from backup files.")
     print(error)
     crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",", encoding="utf-8", dtype=dtypes, parse_dates=["FECHA"])
     police_df = pd.read_csv("data/Estaciones_policia.csv", delimiter=",", encoding="utf-8")
@@ -137,7 +134,10 @@ dtypes = {"CRIMEN_ID": "int64",
           "MEDIO_TRANSPORTE_VICTIMA": "category",
           "MEDIO_TRANSPORTE_VICTIMARIO": "category",
           "TIPO_ARMA": "category"}
-crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",", encoding="utf-8", dtype=dtypes, parse_dates=["FECHA"])
+if '.csv' in filename:
+    crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",", encoding="utf-8", dtype=dtypes, parse_dates=["FECHA"])
+else:
+    #crime_df = #Read data from user sql db | work in progress 
 
 # Adjust value order of several categorical fields
 column_dtype = pd.api.types.CategoricalDtype(categories=['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'], ordered=True)
@@ -162,6 +162,7 @@ crime_df.loc[crime_spunits.sort_values(by="CRIMEN_ID")["CRIMEN_ID"]-1, spunit_db
 # Identify nearest police station to each crime in database
 # ################################################################################
 police_geojson = geopandas.read_file("data/Estaciones_policia.geojson")
+#police_geojson = = geopandas.GeoDataFrame(police_df[["NOMBRE"]], crs='epsg:4326', geometry=geopandas.points_from_xy(police_df.LONGITUD, police_df.LATITUD))
 tree = BallTree(police_geojson[['LATITUD', 'LONGITUD']].values, metric=lambda u, v: distance.distance(u, v).km)
 distances, indices = tree.query(crime_df[['LATITUD', 'LONGITUD']].fillna(0).values, k = 1)
 crime_df['DISTANCIA_ESTACION_POLICIA_CERCANA'] = distances

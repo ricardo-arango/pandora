@@ -9,18 +9,12 @@ from app import app
 from lib import sidebar, content, graphics, navbar, home, predictions, tools, about
 
 # ################################################################################
-# XXXXXXXYZ
+# Set app layout
 # ################################################################################
 app.layout = html.Div([dcc.Location(id="url"), navbar.navbar, sidebar.sidebar, content.content])
 
 # ################################################################################
-# starting the main map
-# ################################################################################
-
-
-
-# ################################################################################
-# Callbacks
+# Declare callbacks
 # ################################################################################
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
