@@ -200,7 +200,7 @@ def plot_scatter_police_stations_by_barrio():
 
     police_df.loc[:, 'NOMBRE'] = police_df['NOMBRE'].str.capitalize()
     fig = px.density_mapbox(
-        police_stations_df,
+        police_df,
         lat='LATITUD',
         lon='LONGITUD',
         radius=10,
