@@ -33,27 +33,35 @@ create table casos (
 
 create table estacion_policia (
 	NOMBRE varchar not null,
-	LATITUD varchar,
-	LONGITUD varchar,
+	LATITUD decimal(10,7),
+	LONGITUD decimal(10,7),
 	PRIMARY KEY (NOMBRE)
 );
 
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1164896', '-73.1120825', 'CAI SOTOMAYOR');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1286976', '-73.1247962', 'OFICINA ATENCIÓN AL CIUDADANO');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.0990524', '-73.1255706', 'POLICIA NACIONAL REAL DE MINAS CAI');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1178298', '-73.1370937', 'CAI SANTANDER');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1186108', '-73.1091518', 'CAI SAN PIO');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1224836', '-73.1339547', 'CAI GIRARDOT');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.12664',   '-73.1100091', 'CAI LAS AMERICAS');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1018035', '-73.1289482', 'ESTACIÓN POLICÍA SUR');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1013338', '-73.1407281', 'CAI CAMPO HERMOSO');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1309077', '-73.1247316', 'CAI SAN FRANCISCO');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1158761', '-73.1287078', 'COMANDO METROPOLITANO DE POLICIA');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1221507', '-73.1251189', 'CAI CENTENARIO');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.114938',  '-73.129539',    'EFECTY CALLE 42 COMANDO DE POLICIA');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1231838', '-73.1250203', 'ESTACIÓN DE POLICÍA CENTRO');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1412614', '-73.1331857', 'CAI POLICE VIRGIN');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1036937', '-73.1264464', 'ESTACIÓN DE POLICIA SUR BUCARAMANGA');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.0976464', '-73.113579',  'INSPECCIÓN DE POLICÍA BUCARAMANGA');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1461981', '-73.126462',  'CAI ESPERANZA I CUADRANTE 006');
-insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values('7.1227501', '-73.1192885', 'SIJIN CRIMINAL INVESTIGATION BRANCH SANTANDER');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1522035, -73.1336676, 'CAI KENNEDY');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1134950, -73.1184010, 'CAI LA CONCORDIA');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1461981, -73.1264620, 'CAI LA ESPERANZA');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1108695, -73.1397951, 'CAI LA JOYA');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.0978148, -73.1190803, 'CAI LA VICTORIA');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1412614, -73.1331857, 'CAI LA VIRGEN');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1266400, -73.1100091, 'CAI LAS AMERICAS');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1259993, -73.1184014, 'CAI LOS NIÑOS');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1344503, -73.1044030, 'CAI MORRORICO');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1002056, -73.1317421, 'CAI MUTIS');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.0990189, -73.1255525, 'CAI REAL DE MINAS');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1307333, -73.1136908, 'CAI SAN ALONSO');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1309077, -73.1247316, 'CAI SAN FRANCISCO');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1186108, -73.1091518, 'CAI SAN PIO');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1178298, -73.1370937, 'CAI SANTANDER');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1164896, -73.1120825, 'CAI SOTOMAYOR');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.0884678, -73.1227788, 'CAI SUR');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.0882117, -73.1296600, 'CAI TERMINAL DE TRANSPORTE');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1127381, -73.1061993, 'CAI TERRAZAS');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.0965682, -73.1105181, 'CAI VIADUCTO');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1286976, -73.1247962, 'COMANDO DE POLICIA SANTANDER');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1158761, -73.1287078, 'COMANDO METROPOLITANO DE POLICIA');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1149380, -73.1295390, 'EFECTY CALLE 42 COMANDO DE POLICIA');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1171147, -73.1250310, 'ESTACIÓN DE POLICÍA CENTRO');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1043412, -73.1249094, 'ESTACIÓN DE POLICÍA SUR');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1405154, -73.1328911, 'ESTACIÓN POLICÍA NORTE');
+insert into estacion_policia(LATITUD, LONGITUD, NOMBRE) values(7.1227501, -73.1192885, 'POLICIA SANTANDER SIC-SIP');

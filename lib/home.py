@@ -128,23 +128,32 @@ def get_cases_by_police_station(search_btn_clicks, year, month):
 
 
 def plot_police_stations_by_barrio():
-    cases_df = crime_df.copy()
-    police_est = police_df.copy()
-    cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
-    police_est = police_est.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
-    police_est = police_est.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
-    police_est = police_est.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
-    df = pd.merge(cases_df, police_est, on='ESTACION_POLICIA')
-    df = df.groupby(["ESTACION_POLICIA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
+    #cases_df = crime_df.copy()
+    #police_est = police_df.copy()
+    #cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
+    #police_est = police_est.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
+    #police_est = police_est.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
+    #police_est = police_est.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
+    #df = pd.merge(cases_df, police_est, on='ESTACION_POLICIA')
+    df = crime_df[["CRIMEN_ID", spunit_db, "ESTACION_POLICIA_CERCANA"]].merge(police_df,
+                                                                   left_on='ESTACION_POLICIA_CERCANA',
+                                                                   right_on='NOMBRE')
+    #df = df.groupby(["ESTACION_POLICIA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
+    df = df.groupby(["ESTACION_POLICIA_CERCANA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
 
     fig = px.choropleth(
         df,
         geojson=barrio_geojson,
-        color="ESTACION_POLICIA",
+        #color="ESTACION_POLICIA",
+        #locations=spunit_db,
+        #featureidkey="properties.NOMBRE",
+        #projection="mercator",
+        #labels={"ESTACION_POLICIA": "Estación", spunit_db: "Barrio"}
+        color="ESTACION_POLICIA_CERCANA",
         locations=spunit_db,
         featureidkey="properties.NOMBRE",
         projection="mercator",
-        labels={"ESTACION_POLICIA": "Estación", spunit_db: "Barrio"}
+        labels={"ESTACION_POLICIA_CERCANA": "Estación policía", spunit_db: "Barrio"}
     )
     fig.update_geos(fitbounds="locations", visible=False)
     return fig

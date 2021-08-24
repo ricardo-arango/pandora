@@ -24,10 +24,10 @@ tools_container = dbc.Container(
                         html.Div(
                             [
                                 html.H4("El aplicativo usa por defecto una versión ajustada y enriquecida de la base de datos "
-                                        "de crímenes registrados en Bucaramanga entre enero de 2010 a febrero de 2021 del "
+                                        "de delitos registrados en Bucaramanga entre enero de 2010 a febrero de 2021 del "
                                         "repositorio de Datos Abiertos del Gobierno de Colombia. Si el usuario desea considerar "
-                                        "una base de datos diferente, debe arastrar y soltar o seleccionar el archivo en formato "
-                                        "csv o sql en el recuadro que se indica abajo."
+                                        "una base de datos diferente para el análisis, debe arastrar y soltar o seleccionar el "
+                                        "archivo en formato csv o sql en el recuadro que se indica abajo."
                                         , className="card-title panel-title"),
                                 #html.Hr()
                         ])
