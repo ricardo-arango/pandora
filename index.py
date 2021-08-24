@@ -6,7 +6,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
 from app import app
-from lib import sidebar, content, graphics, navbar, home, predictions, tools, about
+from lib import sidebar, content, navbar, home, predictions, tools, about
 
 # ################################################################################
 # Set app layout
@@ -27,7 +27,8 @@ def render_page_content(pathname):
     elif pathname == "/about":
         return about.about_container
     elif pathname == "/charts":
-        return graphics.tabs_container
+        # return graphics.tabs_container
+        return html.h5()
     else:
         return home.home_container
 

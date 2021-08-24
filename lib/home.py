@@ -13,7 +13,6 @@ from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, hom
 from lib.FeatureCard import FeatureCard
 
 current_date = date.today()
-current_year = current_date.year
 all_trasportation_assailant = np.append([applicationconstants.all_label], crime_df["MEDIO_TRANSPORTE_VICTIMARIO"].str.capitalize().unique())
 all_gun_type = np.append([applicationconstants.all_label], crime_df["TIPO_ARMA"].str.capitalize().unique())
 all_crime_type = np.append([applicationconstants.all_label], crime_df["TIPO_DELITO"].str.capitalize().unique())
@@ -39,9 +38,7 @@ personalinjury_card = FeatureCard("Lesiones personales", 0, 0, False, "fas fa-cr
     ]
 )
 def get_top_ten_barrios_graph(search_btn_clicks, year, month):
-    global current_year
-    current_year = year
-    cases_df = crime_df[(crime_df["AÑO"] == current_year) & (crime_df["MES_num"] == month)]
+    cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
     cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
     barrio_cn = barrio_cn.sort_values(by="casos", ascending=False).head(10)
@@ -67,21 +64,23 @@ def get_top_ten_barrios_graph(search_btn_clicks, year, month):
 @app.callback(
     Output("map-plot", "figure"),
     Input("search-btn", "n_clicks"),
-    State("year", "value")
+    [
+        State("year", "value"),
+        State("month", "value"),
+    ]
 )
-def map_plot_cases(search_btn_clicks, year):
-    global current_year
-    current_year = year
-    cases_df = crime_df[crime_df["AÑO"] == current_year]
-    barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
+def map_plot_cases(search_btn_clicks, year, month):
+    cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
+    barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="Casos")
     fig = px.choropleth(
         barrio_cn,
         geojson=barrio_geojson,
-        color="casos",
+        color="Casos",
+        # color_continuous_scale=px.colors.sequential.Blues,
         color_continuous_scale=px.colors.sequential.Blues,
         locations=spunit_db, featureidkey="properties."+spunit_js,
         projection="mercator",
-        labels={"casos": "Casos", spunit_db: "Barrio"}
+        labels={spunit_db: "Barrio"}
     )
     fig.update_layout(
         font_family="revert",
@@ -92,7 +91,7 @@ def map_plot_cases(search_btn_clicks, year):
     return fig
 
 @app.callback(
-    Output("police-stat-plot", "figure"),
+    Output("police-stat-bar-plot", "figure"),
     Input("search-btn", "n_clicks"),
     [
         State("year", "value"),
@@ -100,9 +99,7 @@ def map_plot_cases(search_btn_clicks, year):
     ]
 )
 def get_cases_by_police_station(search_btn_clicks, year, month):
-    global current_year
-    current_year = year
-    cases_df = crime_df[(crime_df["AÑO"] == current_year) & (crime_df["MES_num"] == month)]
+    cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
     cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     cases_df.loc[:, "ESTACION_POLICIA_CERCANA"] = cases_df["ESTACION_POLICIA_CERCANA"].str.title()
     cases_df = cases_df.groupby(["ESTACION_POLICIA_CERCANA"])["CRIMEN_ID"].count().reset_index(name="Casos")
@@ -153,11 +150,70 @@ def plot_police_stations_by_barrio():
         locations=spunit_db,
         featureidkey="properties.NOMBRE",
         projection="mercator",
-        labels={"ESTACION_POLICIA_CERCANA": "Estación policía", spunit_db: "Barrio"}
+        labels={"ESTACION_POLICIA_CERCANA": "Estación policía", spunit_db: "Barrio"})
+
+# @app.callback(
+#     Output("est-policia-barrio", "figure"),
+#     Input("search-btn", "n_clicks"),
+#     [
+#         State("year", "value"),
+#         State("month", "value"),
+#     ]
+# )
+def plot_scatter_police_stations_by_barrio():
+    # cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
+    # police_df = police_stations_df.copy()
+    # cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
+    # police_df = police_df.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
+    # police_df = police_df.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
+    # police_df = police_df.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
+    # df = pd.merge(cases_df, police_df, on='ESTACION_POLICIA')
+    # scatter_df = df.groupby(["ESTACION_POLICIA", spunit_db, "LATITUD_ESTACION_POLICIA", "LONGITUD_ESTACION_POLICIA"])["CRIMEN_ID"].count().reset_index(name="Casos")
+    # scatter_df.loc[:, "ESTACION_POLICIA"] = scatter_df["ESTACION_POLICIA"].str.title()
+    # fig_sca = px.scatter_geo(
+    #     scatter_df,
+    #     lat="LATITUD_ESTACION_POLICIA",
+    #     lon="LONGITUD_ESTACION_POLICIA",
+    #     hover_name="ESTACION_POLICIA",
+    #     size="Casos",
+    #     labels={"LATITUD_ESTACION_POLICIA": "Latitud", "LONGITUD_ESTACION_POLICIA": "Longitud"}
+    # )
+    # barrios_df = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="Casos")
+    # fig_choro = px.choropleth(
+    #     barrios_df,
+    #     geojson=barrio_geojson,
+    #     color="Casos",
+    #     color_continuous_scale=px.colors.sequential.deep,
+    #     locations=spunit_db, featureidkey="properties.NOMBRE",
+    #     projection="mercator",
+    #     labels={spunit_db: "Barrio"}
+    # )
+    # fig_choro.update_layout(
+    #     font_family="revert",
+    #     font_color="#5f5f5f"
+    # )
+    # fig_choro.update_geos(fitbounds="locations", visible=False)
+    # fig_choro.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    #
+    # fig_choro.add_trace(fig_sca.data[0])
+    # return fig_choro
+
+    police_df.loc[:, 'NOMBRE'] = police_df['NOMBRE'].str.capitalize()
+    fig = px.density_mapbox(
+        police_stations_df,
+        lat='LATITUD',
+        lon='LONGITUD',
+        radius=10,
+        center=dict(lat=7.11392, lon=-73.1198),
+        zoom=11,
+        color_continuous_scale=px.colors.sequential.Aggrnyl,
+        mapbox_style="open-street-map",
+        labels={"LATITUD": "Latitud", "LONGITUD": "Longitud", "NOMBRE": "Estación"},
+        hover_data=["NOMBRE"],
     )
     fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
     return fig
-
 
 home_container = dbc.Container(
     [
@@ -447,11 +503,15 @@ home_container = dbc.Container(
                                 "Distribución de estaciones de policía por barrios",
                                 className="tile-title"
                             ),
-                            dcc.Graph(id="est-policia-barrio", figure=plot_police_stations_by_barrio())
+                            dcc.Graph(
+                                id="est-policia-barrio",
+                                figure=plot_scatter_police_stations_by_barrio(),
+                                style={"padding": "5px 0px 5px 17px"}
+                            )
                         ],
                         className="panel-st-1"
                         )
-                    ], width="5"
+                    ], width="4"
                 ),
                 dbc.Col(
                     [
@@ -460,11 +520,11 @@ home_container = dbc.Container(
                             html.H5(
                                 "Casos por distancia a estación de policía",
                                 className="tile-title"),
-                            dcc.Graph(id="police-stat-plot")
+                            dcc.Graph(id="police-stat-bar-plot")
                         ],
                         className="panel-st-1"
                         )
-                    ], width="7"
+                    ], width="8"
                 )
             ]
         ),
@@ -498,16 +558,14 @@ home_container = dbc.Container(
      ],
 )
 def refresh_dashboard_by_date(search_clicks, year, month):
-    global current_year
-    current_year = year
-    cases_df = crime_df[(crime_df["AÑO"] == current_year) & (crime_df["MES_num"] == month)]
+    cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
     cases_before_df = pd.DataFrame()
     if month == 1:
         month_before = 12
         year_before = year - 1
     else:
         month_before = month - 1
-        year_before = current_year
+        year_before = year
 
     if year_before >= 2010:
         cases_before_df = crime_df[(crime_df["AÑO"] == year_before) & (crime_df["MES_num"] == month_before)]
