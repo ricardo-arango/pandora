@@ -9,7 +9,7 @@ from app import app
 from lib import sidebar, content, graphics, navbar, home, predictions, tools, about
 
 # ################################################################################
-# XXXXXXXXX
+# XXXXXXXXXX
 # ################################################################################
 app.layout = html.Div([dcc.Location(id="url"), navbar.navbar, sidebar.sidebar, content.content])
 
