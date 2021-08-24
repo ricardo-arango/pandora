@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 from app import app
-from dataloading import crime_df, police_stations_df, barrio_geojson, spunit_db, spunit_js
+from dataloading import crime_df, police_df, barrio_geojson, spunit_db, spunit_js
 from datetime import date
 from dash.dependencies import Input, Output, State
 from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal, applicationconstants
@@ -129,12 +129,12 @@ def get_cases_by_police_station(search_btn_clicks, year, month):
 
 def plot_police_stations_by_barrio():
     cases_df = crime_df.copy()
-    police_df = police_stations_df.copy()
+    police_est = police_df.copy()
     cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
-    police_df = police_df.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
-    police_df = police_df.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
-    police_df = police_df.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
-    df = pd.merge(cases_df, police_df, on='ESTACION_POLICIA')
+    police_est = police_est.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
+    police_est = police_est.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
+    police_est = police_est.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
+    df = pd.merge(cases_df, police_est, on='ESTACION_POLICIA')
     df = df.groupby(["ESTACION_POLICIA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
 
     fig = px.choropleth(
