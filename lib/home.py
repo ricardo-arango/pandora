@@ -124,34 +124,6 @@ def get_cases_by_police_station(search_btn_clicks, year, month):
     return bar_plot
 
 
-def plot_police_stations_by_barrio():
-    #cases_df = crime_df.copy()
-    #police_est = police_df.copy()
-    #cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
-    #police_est = police_est.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
-    #police_est = police_est.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
-    #police_est = police_est.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
-    #df = pd.merge(cases_df, police_est, on='ESTACION_POLICIA')
-    df = crime_df[["CRIMEN_ID", spunit_db, "ESTACION_POLICIA_CERCANA"]].merge(police_df,
-                                                                   left_on='ESTACION_POLICIA_CERCANA',
-                                                                   right_on='NOMBRE')
-    #df = df.groupby(["ESTACION_POLICIA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
-    df = df.groupby(["ESTACION_POLICIA_CERCANA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
-
-    fig = px.choropleth(
-        df,
-        geojson=barrio_geojson,
-        #color="ESTACION_POLICIA",
-        #locations=spunit_db,
-        #featureidkey="properties.NOMBRE",
-        #projection="mercator",
-        #labels={"ESTACION_POLICIA": "Estación", spunit_db: "Barrio"}
-        color="ESTACION_POLICIA_CERCANA",
-        locations=spunit_db,
-        featureidkey="properties.NOMBRE",
-        projection="mercator",
-        labels={"ESTACION_POLICIA_CERCANA": "Estación policía", spunit_db: "Barrio"})
-
 # @app.callback(
 #     Output("est-policia-barrio", "figure"),
 #     Input("search-btn", "n_clicks"),
@@ -160,14 +132,15 @@ def plot_police_stations_by_barrio():
 #         State("month", "value"),
 #     ]
 # )
+#def plot_scatter_police_stations_by_barrio(search, year, month):
 def plot_scatter_police_stations_by_barrio():
     # cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
-    # police_df = police_stations_df.copy()
+    # police_stations_df = police_df.copy()
     # cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
-    # police_df = police_df.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
-    # police_df = police_df.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
-    # police_df = police_df.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
-    # df = pd.merge(cases_df, police_df, on='ESTACION_POLICIA')
+    # police_stations_df = police_stations_df.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
+    # police_stations_df = police_stations_df.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
+    # police_stations_df = police_stations_df.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
+    # df = pd.merge(cases_df, police_stations_df, on='ESTACION_POLICIA')
     # scatter_df = df.groupby(["ESTACION_POLICIA", spunit_db, "LATITUD_ESTACION_POLICIA", "LONGITUD_ESTACION_POLICIA"])["CRIMEN_ID"].count().reset_index(name="Casos")
     # scatter_df.loc[:, "ESTACION_POLICIA"] = scatter_df["ESTACION_POLICIA"].str.title()
     # fig_sca = px.scatter_geo(
