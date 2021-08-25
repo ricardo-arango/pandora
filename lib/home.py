@@ -13,7 +13,7 @@ from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, hom
 from lib.FeatureCard import FeatureCard
 
 current_date = date.today()
-all_trasportation_assailant = np.append([applicationconstants.all_label], crime_df["MEDIO_TRANSPORTE_VICTIMARIO"].str.capitalize().unique())
+all_transportation_assailant = np.append([applicationconstants.all_label], crime_df["MEDIO_TRANSPORTE_VICTIMARIO"].str.capitalize().unique())
 all_gun_type = np.append([applicationconstants.all_label], crime_df["TIPO_ARMA"].str.capitalize().unique())
 all_crime_type = np.append([applicationconstants.all_label], crime_df["TIPO_DELITO"].str.capitalize().unique())
 
@@ -399,7 +399,7 @@ home_container = dbc.Container(
                                 dcc.Dropdown(
                                     id="trasport-vict",
                                     options=[
-                                        {"label": col, "value": col} for col in all_trasportation_assailant
+                                        {"label": col, "value": col} for col in all_transportation_assailant
                                     ],
                                     clearable=False,
                                     value=applicationconstants.all_label
