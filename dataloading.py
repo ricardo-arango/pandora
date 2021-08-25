@@ -40,6 +40,7 @@ barrio_geojson = geopandas.read_file("data/Barrio_Comuna_Corregimiento.geojson")
 # ################################################################################
 crime_df_columns = ['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA', 'DIA_SEMANA_num', 'LATITUD', 'LONGITUD', 'ZONA', 'COMUNA', 'COMUNA_num', 'BARRIO', 'UNIDAD_ESPACIAL', 'TIPO_DELITO_ARTICULO', 'TIPO_DELITO', 'TIPO_CONDUCTA', 'TIPO_LESION', 'GENERO_VICTIMA', 'EDAD_VICTIMA', 'GRUPO_ETARIO_VICTIMA', 'GRUPO_ETARIO_VICTIMA_num', 'ESTADO_CIVIL_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMARIO', 'TIPO_ARMA', 'DISTANCIA_ESTACION_POLICIA_CERCANA', 'ESTACION_POLICIA_CERCANA']
 police_df_columns = ['NOMBRE', 'LATITUD', 'LONGITUD']
+months = [{"label": "Enero", "value": 1}, {"label": "Febrero", "value": 2}, {"label": "Marzo", "value": 3}, {"label": "Abril", "value": 4}, {"label": "Mayo", "value": 5}, {"label": "Junio", "value": 6}, {"label": "Julio", "value": 7}, {"label": "Agosto", "value": 8}, {"label": "Septiembre", "value": 9}, {"label": "Octubre", "value": 10}, {"label": "Noviembre", "value": 11}, {"label": "Diciembre", "value": 12}]
 
 dtypes = {"CRIMEN_ID": "int64",
               "AÑO": "int64",
