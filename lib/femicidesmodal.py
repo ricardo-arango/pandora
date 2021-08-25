@@ -49,12 +49,12 @@ modal_instance = dbc.Modal(
                                                 ),
                                             ], width="3"),
                                             dbc.Col([
-                                                dbc.Label(applicationconstants.barrio_label, className="labels-font labels-margin"),
+                                                dbc.Label(applicationconstants.month_label, className="labels-font labels-margin"),
                                                 dcc.Dropdown(
-                                                    id="femicides-barrio",
+                                                    id="femicides-meses",
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
-                                                        {"label": col, "value": col} for col in crime_df["BARRIO"].str.title().unique()
+                                                        {"label": col, "value": col} for col in crime_df["MES"].str.capitalize().unique()
                                                     ],
                                                 ),
                                             ], width="3"),
@@ -110,12 +110,12 @@ modal_instance = dbc.Modal(
     [
      Input("femicides-year", "value"),
      Input("femicides-diasemana", "value"),
-     Input("femicides-barrio", "value"),
+     Input("femicides-meses", "value"),
      Input("femicides-grupoetario", "value"),
     Input("femicides-diasemana-toggle", "value")
     ]
 )
-def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
+def generate_graphic(year, week_day, month, grupo_etario, show_by_week_day):
     cases_df = crime_df[crime_df["TIPO_DELITO"] == "FEMINICIDIO"]
     if not year:
         year = 2010
@@ -129,8 +129,9 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
     cases_df.loc[:, 'TIPO_CONDUCTA'] = cases_df['TIPO_CONDUCTA'].str.capitalize()
     cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
     cases_df.loc[:, 'GRUPO_ETARIO_VICTIMA'] = cases_df['GRUPO_ETARIO_VICTIMA'].str.capitalize()
-    if barrio:
-        cases_df = cases_df[cases_df[spunit_db] == barrio]
+    cases_df.loc[:, 'MES'] = cases_df['MES'].str.capitalize()
+    if month:
+        cases_df = cases_df[cases_df[spunit_db] == month]
     if week_day:
         cases_df = cases_df[cases_df["DIA_SEMANA"] == week_day]
     if grupo_etario:
