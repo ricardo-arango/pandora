@@ -10,7 +10,6 @@ sidebar = html.Div(
                 dbc.NavLink(children=[html.I(className="fas fa-tools fa-2x"), html.H6("Herramientas")], href="/tools", active="exact", className="sidebar-icons"),
                 dbc.NavLink(children=[html.I(className="far fa-address-card fa-2x"), html.H6("Acerca de...")], href="/about", active="exact", className="sidebar-icons"),
                 dbc.NavLink(html.Hr()),
-                dbc.NavLink(children=[html.I(className="fas fa-chart-bar fa-2x"), html.H6("Temp")], href="/charts", active="exact", className="sidebar-icons"),
             ],
             vertical=True,
             fill=True,

@@ -27,7 +27,6 @@ def render_page_content(pathname):
     elif pathname == "/about":
         return about.about_container
     elif pathname == "/charts":
-        # return graphics.tabs_container
         return html.h5()
     else:
         return home.home_container
