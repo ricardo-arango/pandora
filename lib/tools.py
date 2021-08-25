@@ -1,6 +1,11 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 
+import dash
+from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
+from app import app
+
 tools_container = dbc.Container(
     [
         dbc.Row(
@@ -14,6 +19,46 @@ tools_container = dbc.Container(
                         ])
                     ], width=12,
                 ),
+                dbc.Col(
+                    [
+                        html.Div(
+                            [
+                                html.H4("El aplicativo usa por defecto una versión ajustada y enriquecida de la base de datos "
+                                        "de delitos registrados en Bucaramanga entre enero de 2010 a febrero de 2021 del "
+                                        "repositorio de Datos Abiertos del Gobierno de Colombia. Si el usuario desea considerar "
+                                        "una base de datos diferente para el análisis, debe arastrar y soltar o seleccionar el "
+                                        "archivo en formato csv o sql en el recuadro que se indica abajo."
+                                        , className="card-title panel-title"),
+                                #html.Hr()
+                        ])
+                    ], width=12,
+                ),
+                dbc.Col(
+                    [
+                        html.Div([
+                            dcc.Upload(
+                                id='upload-data',
+                                children=html.Div([
+                                    'Arrastrar y Soltar o ',
+                                    html.A('Seleccionar Archivo')
+                                ]),
+                                style={
+                                    'width': '100%',
+                                    'height': '60px',
+                                    'lineHeight': '60px',
+                                    'borderWidth': '1px',
+                                    'borderStyle': 'dashed',
+                                    'borderRadius': '5px',
+                                    'textAlign': 'center',
+                                    'margin': '10px'
+                                },
+                                # Allow multiple files to be uploaded
+                                multiple=False
+                            ),
+                            html.Div(id='output-data-upload'),
+                        ])
+                    ], width=12,
+                )
             ]
         ),
     ],
@@ -24,3 +69,54 @@ tools_container = dbc.Container(
     }
 )
 
+'''
+#def parse_contents(contents, filename, date):
+def parse_contents(filename):
+    #content_type, content_string = contents.split(',')
+
+    #decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            #df = pd.read_csv(
+            #    io.StringIO(decoded.decode('utf-8')))
+            print(filename)
+        elif 'sql' in filename:
+            #df = pd.read_excel(io.BytesIO(decoded))
+            print(filename)
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+
+    return html.Div([
+        html.H5(filename),
+        #html.H6(datetime.datetime.fromtimestamp(date)),
+
+        #dash_table.DataTable(
+        #    data=df.to_dict('records'),
+        #    columns=[{'name': i, 'id': i} for i in df.columns]
+        #),
+
+        html.Hr(),  # horizontal line
+
+        # For debugging, display the raw contents provided by the web browser
+        #html.Div('Raw Content'),
+        #html.Pre(contents[0:200] + '...', style={
+        #    'whiteSpace': 'pre-wrap',
+        #    'wordBreak': 'break-all'
+        #})
+    ])
+
+
+@app.callback(Output('output-image-upload', 'children'),
+              #Input('upload-image', 'contents'),
+              Input('upload-image', 'filename'))#,
+              #State('upload-image', 'last_modified'))
+#def update_output(list_of_contents, list_of_names, list_of_dates):
+def update_output(list_of_names):
+    if list_of_names is not None:
+        children = [list_of_names]
+        print(children)
+        return children
+'''

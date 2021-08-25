@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 from app import app
-from dataloading import crime_df, police_stations_df, barrio_geojson, spunit_db, spunit_js
+from dataloading import crime_df, police_df, barrio_geojson, spunit_db, spunit_js
 from datetime import date
 from dash.dependencies import Input, Output, State
 from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal, applicationconstants
@@ -124,6 +124,34 @@ def get_cases_by_police_station(search_btn_clicks, year, month):
     return bar_plot
 
 
+def plot_police_stations_by_barrio():
+    #cases_df = crime_df.copy()
+    #police_est = police_df.copy()
+    #cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
+    #police_est = police_est.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
+    #police_est = police_est.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
+    #police_est = police_est.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
+    #df = pd.merge(cases_df, police_est, on='ESTACION_POLICIA')
+    df = crime_df[["CRIMEN_ID", spunit_db, "ESTACION_POLICIA_CERCANA"]].merge(police_df,
+                                                                   left_on='ESTACION_POLICIA_CERCANA',
+                                                                   right_on='NOMBRE')
+    #df = df.groupby(["ESTACION_POLICIA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
+    df = df.groupby(["ESTACION_POLICIA_CERCANA", spunit_db])["CRIMEN_ID"].count().reset_index(name="Casos")
+
+    fig = px.choropleth(
+        df,
+        geojson=barrio_geojson,
+        #color="ESTACION_POLICIA",
+        #locations=spunit_db,
+        #featureidkey="properties.NOMBRE",
+        #projection="mercator",
+        #labels={"ESTACION_POLICIA": "Estación", spunit_db: "Barrio"}
+        color="ESTACION_POLICIA_CERCANA",
+        locations=spunit_db,
+        featureidkey="properties.NOMBRE",
+        projection="mercator",
+        labels={"ESTACION_POLICIA_CERCANA": "Estación policía", spunit_db: "Barrio"})
+
 # @app.callback(
 #     Output("est-policia-barrio", "figure"),
 #     Input("search-btn", "n_clicks"),
@@ -170,9 +198,9 @@ def plot_scatter_police_stations_by_barrio():
     # fig_choro.add_trace(fig_sca.data[0])
     # return fig_choro
 
-    police_stations_df.loc[:, 'NOMBRE'] = police_stations_df['NOMBRE'].str.capitalize()
+    police_df.loc[:, 'NOMBRE'] = police_df['NOMBRE'].str.capitalize()
     fig = px.density_mapbox(
-        police_stations_df,
+        police_df,
         lat='LATITUD',
         lon='LONGITUD',
         radius=10,
