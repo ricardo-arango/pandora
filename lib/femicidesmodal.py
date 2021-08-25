@@ -54,7 +54,18 @@ modal_instance = dbc.Modal(
                                                     id="femicides-meses",
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
-                                                        {"label": col, "value": col} for col in crime_df["MES"].str.capitalize().unique()
+                                                        {"label": "Enero", "value": 1},
+                                                        {"label": "Febrero", "value": 2},
+                                                        {"label": "Marzo", "value": 3},
+                                                        {"label": "Abril", "value": 4},
+                                                        {"label": "Mayo", "value": 5},
+                                                        {"label": "Junio", "value": 6},
+                                                        {"label": "Julio", "value": 7},
+                                                        {"label": "Agosto", "value": 8},
+                                                        {"label": "Septiembre", "value": 9},
+                                                        {"label": "Octubre", "value": 10},
+                                                        {"label": "Noviembre", "value": 11},
+                                                        {"label": "Diciembre", "value": 12}
                                                     ],
                                                 ),
                                             ], width="3"),
@@ -131,7 +142,7 @@ def generate_graphic(year, week_day, month, grupo_etario, show_by_week_day):
     cases_df.loc[:, 'GRUPO_ETARIO_VICTIMA'] = cases_df['GRUPO_ETARIO_VICTIMA'].str.capitalize()
     cases_df.loc[:, 'MES'] = cases_df['MES'].str.capitalize()
     if month:
-        cases_df = cases_df[cases_df[spunit_db] == month]
+        cases_df = cases_df[cases_df["MES"] == month]
     if week_day:
         cases_df = cases_df[cases_df["DIA_SEMANA"] == week_day]
     if grupo_etario:
@@ -147,7 +158,7 @@ def generate_graphic(year, week_day, month, grupo_etario, show_by_week_day):
             y="Casos",
             color="UNIDAD_ESPACIAL",
             color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
-            labels={"TIPO_CONDUCTA": "Tipo Conducta", "TIPO_DELITO": "Tipo Delito"},
+            labels={"UNIDAD_ESPACIAL": "Barrio"},
             height=800
         )
     else:
