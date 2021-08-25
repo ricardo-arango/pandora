@@ -2,6 +2,8 @@ Bottleneck
 branca
 dash
 dash-bootstrap-components
+dash-core-components
+dash-html-components
 fontawesomefree
 folium
 geopandas
