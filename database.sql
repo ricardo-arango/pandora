@@ -11,7 +11,7 @@ create table casos (
 	LONGITUD decimal(10,7),
 	ZONA varchar,
 	COMUNA varchar,
-	COMUNA_num decimal,
+	COMUNA_num int,
 	BARRIO varchar,
 	UNIDAD_ESPACIAL varchar,
 	TIPO_DELITO_ARTICULO varchar,

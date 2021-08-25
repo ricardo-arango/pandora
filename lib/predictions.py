@@ -1,5 +1,6 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
+from dataloading import crime_df
 
 predictions_container = dbc.Container(
     [

@@ -52,7 +52,7 @@ dtypes = {"CRIMEN_ID": "int64",
               "LONGITUD": "float64",
               "ZONA": "category",
               "COMUNA": "category",
-              #"COMUNA_num": "int64", #Generates an error. It may be associated with the sql db setup
+              "COMUNA_num": "int64", #Generates an error. It may be associated with the sql db setup
               "BARRIO": "category",
               "UNIDAD_ESPACIAL": "category",
               "TIPO_DELITO_ARTICULO": "category",
@@ -60,7 +60,7 @@ dtypes = {"CRIMEN_ID": "int64",
               "TIPO_CONDUCTA": "category",
               "TIPO_LESION": "category",
               "GENERO_VICTIMA": "category",
-              #"EDAD_VICTIMA": "int64", #Generates an error. It may be associated with the sql db setup
+              "EDAD_VICTIMA": "int64", #Generates an error. It may be associated with the sql db setup
               "GRUPO_ETARIO_VICTIMA": "category",
               "GRUPO_ETARIO_VICTIMA_num": "int64",
               "ESTADO_CIVIL_VICTIMA": "category",
@@ -94,7 +94,7 @@ finally:
     if connection is not None:
         cursor.close()
         connection.close()
-
+print("test*****************************************")
 # Adjust value order of several categorical fields
 column_dtype = pd.api.types.CategoricalDtype(categories=['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'], ordered=True)
 crime_df["MES"] = crime_df["MES"].astype(column_dtype)
