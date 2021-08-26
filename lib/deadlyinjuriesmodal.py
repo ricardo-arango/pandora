@@ -5,7 +5,7 @@ import numpy as np
 import plotly.express as px
 import dataloading
 
-from dataloading import barrio_geojson, spunit_db, spunit_js
+from dataloading import spunit_db
 from app import app
 from dash.dependencies import Input, Output
 from lib import applicationconstants
@@ -70,7 +70,7 @@ modal_instance = dbc.Modal(
                                                 ),
                                             ], width="3")
                                         ], style={"padding": "0 16px 0 16px"}),
-                                    dcc.Graph(id="t1graph"),
+                                    dcc.Graph(id="deadly-graph"),
                                     html.Div(
                                         dbc.Checklist(
                                             id="deadly-diasemana-toggle",
@@ -85,7 +85,7 @@ modal_instance = dbc.Modal(
                                     ),
                                 ],
                                 style={
-                                    "height": "850px"
+                                    "height": "550px"
                                 }
                             )
                         ],
@@ -107,13 +107,13 @@ modal_instance = dbc.Modal(
 
 
 @app.callback(
-    Output("t1graph", "figure"),
+    Output("deadly-graph", "figure"),
     [
      Input("deadly-year", "value"),
      Input("deadly-diasemana", "value"),
      Input("deadly-barrio", "value"),
      Input("deadly-grupoetario", "value"),
-    Input("deadly-diasemana-toggle", "value")
+     Input("deadly-diasemana-toggle", "value")
     ]
 )
 def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
@@ -148,7 +148,7 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
             color="TIPO_CONDUCTA",
             color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
             labels={"TIPO_CONDUCTA": "Tipo Conducta", "TIPO_DELITO": "Tipo Delito"},
-            height=800
+            height=500
         )
     else:
         injury_type_df = cases_df.groupby(["DIA_SEMANA", "TIPO_DELITO", "TIPO_CONDUCTA"]).size().reset_index(name="Casos")
@@ -159,7 +159,7 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
             color="TIPO_CONDUCTA",
             color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
             labels={"DIA_SEMANA": "Día de la semana", "TIPO_CONDUCTA": "Tipo Conducta", "TIPO_DELITO": "Tipo Delito"},
-            height=800
+            height=500
         )
     fig.update_layout(
         font_family="revert",
