@@ -120,7 +120,7 @@ def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, most
             x="AÑO",
             y="Casos",
             color='Casos',
-            color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
+            color_continuous_scale=px.colors.sequential.Blues,
             labels={"AÑO": "Año"}
         )
     else:
@@ -129,17 +129,20 @@ def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, most
             filtered_cases,
             x="DIA_SEMANA",
             y="Casos",
-            color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
+            color='Casos',
+            color_continuous_scale=px.colors.sequential.Blues,
             labels={"DIA_SEMANA": "Día de la semana"}
         )
-
+    barplot_all_years.update_traces(
+        marker_line_color='rgb(8,48,107)',
+        marker_line_width=0.2,
+        opacity=0.8)
     barplot_all_years.update_layout(
         font_family="revert",
-        font_color="#5f5f5f"
+        font_color="#5f5f5f",
+        paper_bgcolor="white"
     )
-    barplot_all_years.update_traces(opacity=0.8)
     barplot_all_years.update_xaxes(dtick="FECHA", ticklabelmode="period")
-    barplot_all_years.update_layout(paper_bgcolor="white")
     return barplot_all_years
 
 
@@ -277,8 +280,8 @@ def get_top_ten_barrios_graph(search_btn_clicks, year, month):
     )
     bar_plot.update_traces(
         marker_line_color='rgb(8,48,107)',
-        marker_line_width=0.05,
-        opacity=1)
+        marker_line_width=0.2,
+        opacity=0.8)
     bar_plot.update_layout(
         font_family="revert",
         font_color="#5f5f5f"
@@ -341,13 +344,8 @@ def get_cases_by_police_station(search_btn_clicks, year, month):
     )
     bar_plot.update_traces(
         marker_line_color='rgb(8,48,107)',
-        marker_line_width=0.05,
-        opacity=1)
-    bar_plot.update_layout(
-        font_family="revert",
-        font_color="#5f5f5f",
-        xaxis=go.layout.XAxis(tickangle=45)
-    )
+        marker_line_width=0.2,
+        opacity=0.8)
     bar_plot.update_layout(
         font_family="revert",
         font_color="#5f5f5f",
