@@ -95,7 +95,7 @@ finally:
     if connection is not None:
         cursor.close()
         connection.close()
-print("test*****************************************")
+
 # Adjust value order of several categorical fields
 column_dtype = pd.api.types.CategoricalDtype(categories=['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'], ordered=True)
 crime_df["MES"] = crime_df["MES"].astype(column_dtype)

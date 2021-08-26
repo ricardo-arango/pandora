@@ -14,6 +14,7 @@ navbar = dbc.Navbar(
                     no_gutters=True,
                 ),
                 href="https://www.bucaramanga.gov.co/Inicio/",
+                target="_blank"
             )
     ],
     color="#354454",

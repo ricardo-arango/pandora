@@ -4,6 +4,7 @@ import dash_core_components as dcc
 import numpy as np
 import plotly.express as px
 import dataloading
+import plotly.graph_objects as go
 
 from dataloading import barrio_geojson, spunit_db, spunit_js
 from app import app
@@ -163,8 +164,9 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
         )
     fig.update_layout(
         font_family="revert",
-        font_color="#5f5f5f"
+        font_color="#5f5f5f",
+        xaxis=go.layout.XAxis(tickangle=45),
+        paper_bgcolor="white"
     )
     fig.update_traces(opacity=0.8)
-    fig.update_layout(paper_bgcolor="white")
     return fig

@@ -4,6 +4,7 @@ import dash_core_components as dcc
 import numpy as np
 import plotly.express as px
 import dataloading
+import plotly.graph_objects as go
 
 from dataloading import spunit_db
 from app import app
@@ -81,11 +82,11 @@ modal_instance = dbc.Modal(
                                             ],
                                             className="toggle-font"
                                         ),
-                                        style={"padding-left": "16px", "margin": "-20px 0"}
+                                        style={"padding-left": "16px", "margin": "25px 0"}
                                     ),
                                 ],
                                 style={
-                                    "height": "550px"
+                                    "height": "600px"
                                 }
                             )
                         ],
@@ -163,8 +164,9 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
         )
     fig.update_layout(
         font_family="revert",
-        font_color="#5f5f5f"
+        font_color="#5f5f5f",
+        xaxis=go.layout.XAxis(tickangle=45),
+        paper_bgcolor="white"
     )
     fig.update_traces(opacity=0.8)
-    fig.update_layout(paper_bgcolor="white")
     return fig
