@@ -68,7 +68,7 @@ modal_instance = dbc.Modal(
                                                 ),
                                             ], width="3")
                                         ], style={"padding": "0 16px 0 16px"}),
-                                    dcc.Graph(id="t1graph"),
+                                    dcc.Graph(id="deadly-graph"),
                                     html.Div(
                                         dbc.Checklist(
                                             id="deadly-diasemana-toggle",
@@ -105,7 +105,7 @@ modal_instance = dbc.Modal(
 
 
 @app.callback(
-    Output("t1graph", "figure"),
+    Output("deadly-graph", "figure"),
     [
      Input("deadly-year", "value"),
      Input("deadly-diasemana", "value"),
