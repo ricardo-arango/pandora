@@ -1,16 +1,16 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-
-from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
-from app import app
-
 import io
 import base64
 import pandas as pd
 import datetime
 import dash_table
-from dataloading import crime_df, dtypes
+import dataloading
+
+from dash.dependencies import Input, Output, State
+from app import app
+from dataloading import dtypes
 
 tools_container = dbc.Container(
     [
@@ -77,13 +77,12 @@ tools_container = dbc.Container(
 
 
 def parse_contents(contents, filename, date):
-    global crime_df
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     try:
         if '.csv' in filename:
             # Assume that the user uploaded a CSV file
-            crime_df = pd.read_csv(io.StringIO(decoded.decode('utf-8'))).astype(dtypes)
+            dataloading.crime_df = pd.read_csv(io.StringIO(decoded.decode('utf-8'))).astype(dtypes)
             #df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), delimiter=",", encoding="utf-8", dtype=types,
             #                       parse_dates=["FECHA"])
             #return df
@@ -97,10 +96,10 @@ def parse_contents(contents, filename, date):
         html.H5(filename),
         html.H6(datetime.datetime.fromtimestamp(date)),
 
-        dash_table.DataTable(
-            data=crime_df.to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in crime_df.columns]
-        ),
+        # dash_table.DataTable(
+        #     data=dataloading.crime_df.to_dict('records'),
+        #     columns=[{'name': i, 'id': i} for i in dataloading.crime_df.columns]
+        # ),
 
         #html.Hr(),  # horizontal line
 

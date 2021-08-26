@@ -3,13 +3,15 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import numpy as np
 import plotly.express as px
-from dataloading import crime_df, barrio_geojson, spunit_db, spunit_js
+import dataloading
+
+from dataloading import barrio_geojson, spunit_db, spunit_js
 from app import app
 from dash.dependencies import Input, Output
 from lib import applicationconstants
 
 allYears = applicationconstants.all_label
-yearDropdownOptions = np.append([allYears], crime_df["AÑO"].unique())
+yearDropdownOptions = np.append([allYears], dataloading.crime_df["AÑO"].unique())
 
 
 modal_instance = dbc.Modal(
@@ -43,7 +45,7 @@ modal_instance = dbc.Modal(
                                                     id="deadly-diasemana",
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
-                                                        {"label": col, "value": col} for col in crime_df["DIA_SEMANA"].str.capitalize().unique()
+                                                        {"label": col, "value": col} for col in dataloading.crime_df["DIA_SEMANA"].str.capitalize().unique()
                                                     ],
                                                 ),
                                             ], width="3"),
@@ -53,7 +55,7 @@ modal_instance = dbc.Modal(
                                                     id="deadly-barrio",
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
-                                                        {"label": col, "value": col} for col in crime_df["BARRIO"].str.title().unique()
+                                                        {"label": col, "value": col} for col in dataloading.crime_df["BARRIO"].str.title().unique()
                                                     ],
                                                 ),
                                             ], width="3"),
@@ -63,7 +65,7 @@ modal_instance = dbc.Modal(
                                                     id="deadly-grupoetario",
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
-                                                        {"label": col, "value": col} for col in crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
+                                                        {"label": col, "value": col} for col in dataloading.crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
                                                     ]
                                                 ),
                                             ], width="3")
@@ -115,7 +117,7 @@ modal_instance = dbc.Modal(
     ]
 )
 def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
-    cases_df = crime_df[crime_df["TIPO_LESION"] == "LESIONES FATALES"]
+    cases_df = dataloading.crime_df[dataloading.crime_df["TIPO_LESION"] == "LESIONES FATALES"]
     if not year:
         year = 2010
 

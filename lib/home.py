@@ -5,19 +5,19 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+import dataloading
 
 from app import app
-from dataloading import crime_df, police_df, barrio_geojson, spunit_db, spunit_js
+from dataloading import police_df, barrio_geojson, spunit_db, spunit_js, months
 from datetime import date
 from dash.dependencies import Input, Output, State
-from dataloading import months
 from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal, applicationconstants
 from lib.FeatureCard import FeatureCard
 
 current_date = date.today()
-all_transportation_assailant = np.append([applicationconstants.all_label], crime_df["MEDIO_TRANSPORTE_VICTIMARIO"].str.capitalize().unique())
-all_gun_type = np.append([applicationconstants.all_label], crime_df["TIPO_ARMA"].str.capitalize().unique())
-all_crime_type = np.append([applicationconstants.all_label], crime_df["TIPO_DELITO"].str.capitalize().unique())
+all_transportation_assailant = np.append([applicationconstants.all_label], dataloading.crime_df["MEDIO_TRANSPORTE_VICTIMARIO"].str.capitalize().unique())
+all_gun_type = np.append([applicationconstants.all_label], dataloading.crime_df["TIPO_ARMA"].str.capitalize().unique())
+all_crime_type = np.append([applicationconstants.all_label], dataloading.crime_df["TIPO_DELITO"].str.capitalize().unique())
 
 # Cards
 femicides_card = FeatureCard("Feminicidios", 0, 0, False, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card()
@@ -54,7 +54,7 @@ personalinjury_card = FeatureCard("Lesiones personales", 0, 0, False, "fas fa-cr
      ],
 )
 def refresh_dashboard_by_date(search_clicks, year, month):
-    cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
+    cases_df = dataloading.crime_df[(dataloading.crime_df["AÑO"] == year) & (dataloading.crime_df["MES_num"] == month)]
     cases_before_df = pd.DataFrame()
     if month == 1:
         month_before = 12
@@ -64,7 +64,7 @@ def refresh_dashboard_by_date(search_clicks, year, month):
         year_before = year
 
     if year_before >= 2010:
-        cases_before_df = crime_df[(crime_df["AÑO"] == year_before) & (crime_df["MES_num"] == month_before)]
+        cases_before_df = dataloading.crime_df[(dataloading.crime_df["AÑO"] == year_before) & (dataloading.crime_df["MES_num"] == month_before)]
 
     femicides_count, femicides_diff, femicides_increased = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "FEMINICIDIO")
     nondeadly_count, nondeadly_diff, nondeadly_increase = get_card_info(cases_df, cases_before_df, "TIPO_LESION", "LESIONES NO FATALES")
@@ -98,7 +98,7 @@ def refresh_dashboard_by_date(search_clicks, year, month):
     ],
 )
 def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, mostrar_por_dia_semana):
-    cases_df = crime_df.copy()
+    cases_df = dataloading.crime_df.copy()
     cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     cases_df.loc[:, 'DIA_SEMANA'] = cases_df['DIA_SEMANA'].str.capitalize()
     cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
@@ -155,7 +155,7 @@ def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, most
     ],
 )
 def density_plot_transport_assailant(transport_assailant, search_clicks, year, month):
-    cases_df = crime_df.copy()
+    cases_df = dataloading.crime_df.copy()
     cases_df.loc[:, 'MEDIO_TRANSPORTE_VICTIMARIO'] = cases_df['MEDIO_TRANSPORTE_VICTIMARIO'].str.capitalize()
     cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]
     if not transport_assailant == applicationconstants.all_label:
@@ -192,7 +192,7 @@ def density_plot_transport_assailant(transport_assailant, search_clicks, year, m
     ],
 )
 def density_plot_gun_type_assailant(gun_type, search_clicks, year, month):
-    cases_df = crime_df.copy()
+    cases_df = dataloading.crime_df.copy()
     cases_df.loc[:, 'TIPO_ARMA'] = cases_df['TIPO_ARMA'].str.capitalize()
     cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]
     if not gun_type == applicationconstants.all_label:
@@ -229,7 +229,7 @@ def density_plot_gun_type_assailant(gun_type, search_clicks, year, month):
     ],
 )
 def density_plot_crime_type(injury_type, search_clicks, year, month):
-    cases_df = crime_df.copy()
+    cases_df = dataloading.crime_df.copy()
     cases_df.loc[:, 'TIPO_DELITO'] = cases_df['TIPO_DELITO'].str.capitalize()
     cases_df = cases_df[(cases_df["AÑO"] == year) & (cases_df["MES_num"] == month)]
     if injury_type != applicationconstants.all_label:
@@ -262,7 +262,7 @@ def density_plot_crime_type(injury_type, search_clicks, year, month):
     ]
 )
 def get_top_ten_barrios_graph(search_btn_clicks, year, month):
-    cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
+    cases_df = dataloading.crime_df[(dataloading.crime_df["AÑO"] == year) & (dataloading.crime_df["MES_num"] == month)]
     cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
     barrio_cn = barrio_cn.sort_values(by="casos", ascending=False).head(10)
@@ -295,7 +295,7 @@ def get_top_ten_barrios_graph(search_btn_clicks, year, month):
     ]
 )
 def map_plot_cases(search_btn_clicks, year, month):
-    cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
+    cases_df = dataloading.crime_df[(dataloading.crime_df["AÑO"] == year) & (dataloading.crime_df["MES_num"] == month)]
     barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="Casos")
     fig = px.choropleth(
         barrio_cn,
@@ -325,7 +325,7 @@ def map_plot_cases(search_btn_clicks, year, month):
     ]
 )
 def get_cases_by_police_station(search_btn_clicks, year, month):
-    cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
+    cases_df = dataloading.crime_df[(dataloading.crime_df["AÑO"] == year) & (dataloading.crime_df["MES_num"] == month)]
     cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     cases_df.loc[:, "ESTACION_POLICIA_CERCANA"] = cases_df["ESTACION_POLICIA_CERCANA"].str.title()
     cases_df = cases_df.groupby(["ESTACION_POLICIA_CERCANA"])["CRIMEN_ID"].count().reset_index(name="Casos")
@@ -365,7 +365,7 @@ def get_cases_by_police_station(search_btn_clicks, year, month):
 #     ]
 # )
 def plot_scatter_police_stations_by_barrio():
-    # cases_df = crime_df[(crime_df["AÑO"] == year) & (crime_df["MES_num"] == month)]
+    # cases_df = dataloading.crime_df[(dataloading.crime_df["AÑO"] == year) & (dataloading.crime_df["MES_num"] == month)]
     # police_stations_df = police_df.copy()
     # cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
     # police_stations_df = police_stations_df.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
@@ -465,7 +465,7 @@ home_container = dbc.Container(
                                             dcc.Dropdown(
                                                 id="year",
                                                 options=[
-                                                    {"label": col, "value": col} for col in crime_df["AÑO"].unique()
+                                                    {"label": col, "value": col} for col in dataloading.crime_df["AÑO"].unique()
                                                 ],
                                                 clearable=False,
                                                 value=current_date.year
@@ -531,7 +531,7 @@ home_container = dbc.Container(
                                             id="diasemana",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in crime_df["DIA_SEMANA"].str.capitalize().unique()
+                                                {"label": col, "value": col} for col in dataloading.crime_df["DIA_SEMANA"].str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="3"),
@@ -541,7 +541,7 @@ home_container = dbc.Container(
                                             id="barrio",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in crime_df["BARRIO"].str.title().unique()
+                                                {"label": col, "value": col} for col in dataloading.crime_df["BARRIO"].str.title().unique()
                                             ]
                                         ),
                                     ], width="3"),
@@ -551,7 +551,7 @@ home_container = dbc.Container(
                                             id="tipolesion",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in crime_df["TIPO_LESION"].str.capitalize().unique()
+                                                {"label": col, "value": col} for col in dataloading.crime_df["TIPO_LESION"].str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="3"),
@@ -561,7 +561,7 @@ home_container = dbc.Container(
                                             id="grupoetario",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
+                                                {"label": col, "value": col} for col in dataloading.crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="3")
