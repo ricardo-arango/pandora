@@ -3,8 +3,10 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 import dataloading
-from dataloading import barrio_geojson, spunit_db, spunit_js
+
+from dataloading import spunit_db
 from app import app
 from dash.dependencies import Input, Output
 from lib import applicationconstants
@@ -50,12 +52,23 @@ modal_instance = dbc.Modal(
                                                 ),
                                             ], width="3"),
                                             dbc.Col([
-                                                dbc.Label(applicationconstants.barrio_label, className="labels-font labels-margin"),
+                                                dbc.Label(applicationconstants.month_label, className="labels-font labels-margin"),
                                                 dcc.Dropdown(
-                                                    id="femicides-barrio",
+                                                    id="femicides-meses",
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
-                                                        {"label": col, "value": col} for col in dataloading.crime_df["BARRIO"].str.title().unique()
+                                                        {"label": "Enero", "value": 1},
+                                                        {"label": "Febrero", "value": 2},
+                                                        {"label": "Marzo", "value": 3},
+                                                        {"label": "Abril", "value": 4},
+                                                        {"label": "Mayo", "value": 5},
+                                                        {"label": "Junio", "value": 6},
+                                                        {"label": "Julio", "value": 7},
+                                                        {"label": "Agosto", "value": 8},
+                                                        {"label": "Septiembre", "value": 9},
+                                                        {"label": "Octubre", "value": 10},
+                                                        {"label": "Noviembre", "value": 11},
+                                                        {"label": "Diciembre", "value": 12}
                                                     ],
                                                 ),
                                             ], width="3"),
@@ -81,13 +94,12 @@ modal_instance = dbc.Modal(
                                             ],
                                             className="toggle-font"
                                         ),
-                                        style={"padding-left": "16px", "margin": "-20px 0"}
+                                        style={"padding-left": "16px", "margin": "25px 0"}
                                     ),
                                 ],
-                                style={
-                                    "width": "100%",
-                                    "height": "100%"
-                                }
+                                 style={
+                                     "height": "600px"
+                                 }
                             )
                         ], width="12"
                     )
@@ -111,12 +123,12 @@ modal_instance = dbc.Modal(
     [
      Input("femicides-year", "value"),
      Input("femicides-diasemana", "value"),
-     Input("femicides-barrio", "value"),
+     Input("femicides-meses", "value"),
      Input("femicides-grupoetario", "value"),
-    Input("femicides-diasemana-toggle", "value")
+     Input("femicides-diasemana-toggle", "value")
     ]
 )
-def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
+def generate_graphic(year, week_day, month, grupo_etario, show_by_week_day):
     cases_df = dataloading.crime_df[dataloading.crime_df["TIPO_DELITO"] == "FEMINICIDIO"]
     if not year:
         year = 2010
@@ -130,8 +142,9 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
     cases_df.loc[:, 'TIPO_CONDUCTA'] = cases_df['TIPO_CONDUCTA'].str.capitalize()
     cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
     cases_df.loc[:, 'GRUPO_ETARIO_VICTIMA'] = cases_df['GRUPO_ETARIO_VICTIMA'].str.capitalize()
-    if barrio:
-        cases_df = cases_df[cases_df[spunit_db] == barrio]
+    cases_df.loc[:, 'MES'] = cases_df['MES'].str.capitalize()
+    if month:
+        cases_df = cases_df[cases_df["MES_num"] == month]
     if week_day:
         cases_df = cases_df[cases_df["DIA_SEMANA"] == week_day]
     if grupo_etario:
@@ -139,32 +152,35 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
 
     # This if means the "Mostrar por día de la semana" toggle is off
     if len(show_by_week_day) == 1:
-        injury_type_df = cases_df.groupby(["UNIDAD_ESPACIAL"]).size().reset_index(name="Casos")
-        injury_type_df = injury_type_df.sort_values(by="Casos", ascending=False)
+        femicides_df = cases_df.groupby([spunit_db]).size().reset_index(name="Casos")
+        femicides_df = femicides_df.sort_values(by="Casos", ascending=False)
         fig = px.bar(
-            injury_type_df,
-            x="UNIDAD_ESPACIAL",
+            femicides_df,
+            x=spunit_db,
             y="Casos",
-            color="UNIDAD_ESPACIAL",
-            color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
-            labels={"TIPO_CONDUCTA": "Tipo Conducta", "TIPO_DELITO": "Tipo Delito"},
-            height=800
+            color='Casos',
+            color_continuous_scale=px.colors.sequential.Blues,
+            labels={spunit_db: "Barrio"},
+            height=500
         )
     else:
-        injury_type_df = cases_df.groupby(["DIA_SEMANA"]).size().reset_index(name="Casos")
+        femicides_df = cases_df.groupby(["DIA_SEMANA", "TIPO_DELITO"]).size().reset_index(name="Casos")
         fig = px.bar(
-            injury_type_df,
+            femicides_df,
             x="DIA_SEMANA",
             y="Casos",
-            color="TIPO_CONDUCTA",
-            color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
+            color='Casos',
+            color_continuous_scale=px.colors.sequential.Blues,
             labels={"DIA_SEMANA": "Día de la semana", "TIPO_CONDUCTA": "Tipo Conducta", "TIPO_DELITO": "Tipo Delito"},
-            height=800
+            height=500
         )
+    fig.update_traces(
+        marker_line_color='rgb(8,48,107)',
+        marker_line_width=0.2,
+        opacity=0.8)
     fig.update_layout(
         font_family="revert",
-        font_color="#5f5f5f"
+        font_color="#5f5f5f",
+        xaxis=go.layout.XAxis(tickangle=45)
     )
-    fig.update_traces(opacity=0.8)
-    fig.update_layout(paper_bgcolor="white")
     return fig
