@@ -18,7 +18,7 @@ yearDropdownOptions = np.append([allYears], dataloading.crime_df["AÑO"].unique(
 modal_instance = dbc.Modal(
     [
         dbc.ModalHeader(
-            html.H5("Casos relacionados con lesiones fatales por tipo de conducta", style={"font-family": "revert", "color": "#5f5f5f"})
+            html.H5("Lesiones fatales", style={"font-family": "revert", "color": "#5f5f5f"})
         ),
         dbc.ModalBody(
             dbc.Row(
@@ -154,7 +154,7 @@ def generate_graphic(year, week_day, barrio, grupo_etario, show_by_week_day):
     else:
         injury_type_df = cases_df.groupby(["DIA_SEMANA", "TIPO_DELITO", "TIPO_CONDUCTA"]).size().reset_index(name="Casos")
         fig = px.bar(
-            injury_type_df,
+            injury_type_df.sort_values(by="Casos", ascending=False),
             x="DIA_SEMANA",
             y="Casos",
             color="TIPO_CONDUCTA",

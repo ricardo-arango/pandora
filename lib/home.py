@@ -27,7 +27,7 @@ nondeadlyinjury_card = FeatureCard("Lesiones no fatales", 0, 0, False, "fas fa-u
 theftpeople_card = FeatureCard("Hurto a personas", 0, 0, False, "fas fa-mask fa-2x", "mask", "0px", theftpeoplemodal.modal_instance).create_card()
 theftresidence_card = FeatureCard("Hurto a residencias", 0, 0, False, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", theftresidencemodal.modal_instance).create_card()
 sexharassment__card = FeatureCard("Acoso sexual", 0, 0, False, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", sexharassmentmodal.modal_instance).create_card()
-homicide_card = FeatureCard("Homicidio", 0, 0, False, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card()
+homicide_card = FeatureCard("Homicidios", 0, 0, False, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card()
 personalinjury_card = FeatureCard("Lesiones personales", 0, 0, False, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", personalinjurymodal.modal_instance).create_card()
 
 
@@ -75,14 +75,14 @@ def refresh_dashboard_by_date(search_clicks, year, month):
     h_personas_count, h_personas_diff, h_personas_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "HURTO A PERSONAS")
     homicide_count, homicide_diff, homicide_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "HOMICIDIO")
     sexharassment_count, sexharassment_diff, sexharassment_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "ACOSO SEXUAL")
-    f = FeatureCard("Femicides", femicides_count, femicides_diff, femicides_increased, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card(),
+    f = FeatureCard("Feminicidios", femicides_count, femicides_diff, femicides_increased, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card(),
     vs = FeatureCard("Violencia sexual", sexualviolence_count, sexualviolence_diff, sexualviolence_increase, "fas fa-venus fa-2x", "venus", "0 0 0 11px", sexviolencemodal.modal_instance).create_card(),
     lf = FeatureCard("Lesiones fatales", deadly_count, deadly_diff, deadly_increase, "fas fa-dizzy fa-2x", "dizzy", "1px 5px", deadlyinjuriesmodal.modal_instance).create_card(),
     lnf = FeatureCard("Lesiones no fatales", nondeadly_count, nondeadly_diff, nondeadly_increase, "fas fa-user-injured fa-2x", "user-injured", "0 0 0 6px", nondeadlyinjuriesmodal.modal_instance).create_card(),
     hp = FeatureCard("Hurto a personas",  h_personas_count, h_personas_diff, h_personas_increase, "fas fa-mask fa-2x", "mask", "0px", theftpeoplemodal.modal_instance).create_card(),
     hr = FeatureCard("Hurto a residencias", h_residence_count, h_residence_diff, h_residence_increase, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", theftresidencemodal.modal_instance).create_card(),
     vg = FeatureCard("Acoso sexual", sexharassment_count, sexharassment_diff, sexharassment_increase, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", sexharassmentmodal.modal_instance).create_card(),
-    h = FeatureCard("Homicidio", homicide_count, homicide_diff, homicide_increase, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card(),
+    h = FeatureCard("Homicidios", homicide_count, homicide_diff, homicide_increase, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card(),
     lp = FeatureCard("Lesiones personales", p_injuries_count, p_injuries_diff, p_injuries_increase, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", personalinjurymodal.modal_instance).create_card(),
     return f, vs, lf, lnf, hp, hr, vg, h, lp
 
@@ -126,7 +126,7 @@ def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, most
     else:
         filtered_cases = cases_df.groupby('DIA_SEMANA').size().reset_index(name="Casos")
         barplot_all_years = px.bar(
-            filtered_cases,
+            filtered_cases.sort_values(by="Casos", ascending=False),
             x="DIA_SEMANA",
             y="Casos",
             color='Casos',
@@ -264,11 +264,11 @@ def density_plot_crime_type(injury_type, search_clicks, year, month):
         State("month", "value"),
     ]
 )
-def get_top_ten_barrios_graph(search_btn_clicks, year, month):
+def get_top_20_barrios_graph(search_btn_clicks, year, month):
     cases_df = dataloading.crime_df[(dataloading.crime_df["AÑO"] == year) & (dataloading.crime_df["MES_num"] == month)]
     cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
     barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="casos")
-    barrio_cn = barrio_cn.sort_values(by="casos", ascending=False).head(10)
+    barrio_cn = barrio_cn.sort_values(by="casos", ascending=False).head(20)
     barrio_cn = barrio_cn.sort_values(by="casos")
     bar_plot = px.bar(
         barrio_cn,
@@ -592,7 +592,7 @@ home_container = dbc.Container(
                         html.Br(),
                         html.Div([
                             html.H5(
-                                "Top 10 de barrios con mayor cantidad de casos por año",
+                                "Top 20 de barrios con mayor cantidad de casos por año",
                                 className="tile-title"
                             ),
                             dcc.Graph(id="barplot-barrio")
@@ -608,7 +608,7 @@ home_container = dbc.Container(
                             html.H5(
                                 "Ubicación geográfica ",
                                 className="tile-title"),
-                            dcc.Graph(id="map-plot")
+                            dbc.Spinner(dcc.Graph(id="map-plot"), color="info")
                         ],
                         className="panel-st-1"
                         )
