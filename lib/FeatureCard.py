@@ -103,12 +103,12 @@ def toggle_nondeadlyinjuries_modal(n1, n2, is_open):
     return is_open
 
 @app.callback(
-    Output("sexharassment-modal", "is_open"),
+    Output("domesticviolence-modal", "is_open"),
     [
-        Input("venus-mars", "n_clicks"),
-        Input("sexharassment-close", "n_clicks")
+        Input("house-user", "n_clicks"),
+        Input("domesticviolence-close", "n_clicks")
     ],
-    [State("sexharassment-modal", "is_open")],
+    [State("domesticviolence-modal", "is_open")],
     prevent_initial_call=True
 )
 def toggle_sexharassment_modal(n1, n2, is_open):

@@ -11,7 +11,7 @@ from app import app
 from dataloading import police_df, barrio_geojson, spunit_db, spunit_js, months
 from datetime import date
 from dash.dependencies import Input, Output, State
-from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, sexharassmentmodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal, applicationconstants
+from lib import femicidesmodal, nondeadlyinjuriesmodal, deadlyinjuriesmodal, homicidemodal, personalinjurymodal, domesticviolencemodal, sexviolencemodal, theftpeoplemodal, theftresidencemodal, applicationconstants
 from lib.FeatureCard import FeatureCard
 
 current_date = date.today()
@@ -26,7 +26,7 @@ deadlyinjury_card = FeatureCard("Lesiones fatales", 0, 0, False, "fas fa-dizzy f
 nondeadlyinjury_card = FeatureCard("Lesiones no fatales", 0, 0, False, "fas fa-user-injured fa-2x", "user-injured", "0 0 0 6px", nondeadlyinjuriesmodal.modal_instance).create_card()
 theftpeople_card = FeatureCard("Hurto a personas", 0, 0, False, "fas fa-mask fa-2x", "mask", "0px", theftpeoplemodal.modal_instance).create_card()
 theftresidence_card = FeatureCard("Hurto a residencias", 0, 0, False, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", theftresidencemodal.modal_instance).create_card()
-sexharassment__card = FeatureCard("Acoso sexual", 0, 0, False, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", sexharassmentmodal.modal_instance).create_card()
+domesticviolence_card = FeatureCard("Violencia doméstica", 0, 0, False, "fas fa-house-user fa-2x", "house-user", "0 0 0 2px", domesticviolencemodal.modal_instance).create_card()
 homicide_card = FeatureCard("Homicidios", 0, 0, False, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card()
 personalinjury_card = FeatureCard("Lesiones personales", 0, 0, False, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", personalinjurymodal.modal_instance).create_card()
 
@@ -41,7 +41,7 @@ personalinjury_card = FeatureCard("Lesiones personales", 0, 0, False, "fas fa-cr
         Output("nondeadlyinjury-div", "children"),
         Output("theftpeople-div", "children"),
         Output("theftresidence-div", "children"),
-        Output("sexharassment-div", "children"),
+        Output("domesticviolence-div", "children"),
         Output("homicide-div", "children"),
         Output("personalinjury-div", "children")
     ],
@@ -70,21 +70,21 @@ def refresh_dashboard_by_date(search_clicks, year, month):
     nondeadly_count, nondeadly_diff, nondeadly_increase = get_card_info(cases_df, cases_before_df, "TIPO_LESION", "LESIONES NO FATALES")
     p_injuries_count, p_injuries_diff, p_injuries_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "LESIONES PERSONALES")
     h_residence_count, h_residence_diff, h_residence_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "HURTO A RESIDENCIAS")
-    sexualviolence_count, sexualviolence_diff, sexualviolence_increase = get_card_info(cases_df, cases_before_df, "TIPO_LESION", "VIOLENCIA SEXUAL")
+    sexual_violence_count, sexual_violence_diff, sexual_violence_increase = get_card_info(cases_df, cases_before_df, "TIPO_LESION", "VIOLENCIA SEXUAL")
     deadly_count, deadly_diff, deadly_increase = get_card_info(cases_df, cases_before_df, "TIPO_LESION", "LESIONES FATALES")
     h_personas_count, h_personas_diff, h_personas_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "HURTO A PERSONAS")
     homicide_count, homicide_diff, homicide_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "HOMICIDIO")
-    sexharassment_count, sexharassment_diff, sexharassment_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "ACOSO SEXUAL")
+    domestic_violence_count, domestic_violence_diff, domestic_violence_increase = get_card_info(cases_df, cases_before_df, "TIPO_DELITO", "VIOLENCIA INTRAFAMILIAR")
     f = FeatureCard("Feminicidios", femicides_count, femicides_diff, femicides_increased, "fas fa-female fa-2x", "female", "0 0 0 11px", femicidesmodal.modal_instance).create_card(),
-    vs = FeatureCard("Violencia sexual", sexualviolence_count, sexualviolence_diff, sexualviolence_increase, "fas fa-venus fa-2x", "venus", "0 0 0 11px", sexviolencemodal.modal_instance).create_card(),
+    vs = FeatureCard("Violencia sexual", sexual_violence_count, sexual_violence_diff, sexual_violence_increase, "fas fa-venus fa-2x", "venus", "0 0 0 11px", sexviolencemodal.modal_instance).create_card(),
     lf = FeatureCard("Lesiones fatales", deadly_count, deadly_diff, deadly_increase, "fas fa-dizzy fa-2x", "dizzy", "1px 5px", deadlyinjuriesmodal.modal_instance).create_card(),
     lnf = FeatureCard("Lesiones no fatales", nondeadly_count, nondeadly_diff, nondeadly_increase, "fas fa-user-injured fa-2x", "user-injured", "0 0 0 6px", nondeadlyinjuriesmodal.modal_instance).create_card(),
     hp = FeatureCard("Hurto a personas",  h_personas_count, h_personas_diff, h_personas_increase, "fas fa-mask fa-2x", "mask", "0px", theftpeoplemodal.modal_instance).create_card(),
     hr = FeatureCard("Hurto a residencias", h_residence_count, h_residence_diff, h_residence_increase, "fas fa-house-damage fa-2x", "house-damage", "0 0 0 2px", theftresidencemodal.modal_instance).create_card(),
-    vg = FeatureCard("Acoso sexual", sexharassment_count, sexharassment_diff, sexharassment_increase, "fas fa-venus-mars fa-2x", "venus-mars", "0 0 0 2px", sexharassmentmodal.modal_instance).create_card(),
+    vd = FeatureCard("Violencia doméstica", domestic_violence_count, domestic_violence_diff, domestic_violence_increase, "fas fa-house-user fa-2x", "house-user", "0 0 0 2px", domesticviolencemodal.modal_instance).create_card(),
     h = FeatureCard("Homicidios", homicide_count, homicide_diff, homicide_increase, "fas fa-skull fa-2x", "skull", "0 0 0 4px", homicidemodal.modal_instance).create_card(),
     lp = FeatureCard("Lesiones personales", p_injuries_count, p_injuries_diff, p_injuries_increase, "fas fa-crutch fa-2x", "crutch", "0 0 0 4px", personalinjurymodal.modal_instance).create_card(),
-    return f, vs, lf, lnf, hp, hr, vg, h, lp
+    return f, vs, lf, lnf, hp, hr, vd, h, lp
 
 
 @app.callback(
@@ -509,7 +509,7 @@ home_container = dbc.Container(
                                 html.Div(theftresidence_card, id="theftresidence-div")
                             ], width="auto"),
                             dbc.Col([
-                                html.Div(sexharassment__card, id="sexharassment-div"),
+                                html.Div(domesticviolence_card, id="domesticviolence-div"),
                                 html.Div(homicide_card, id="homicide-div"),
                                 html.Div(personalinjury_card, id="personalinjury-div")
                             ], width="auto")
