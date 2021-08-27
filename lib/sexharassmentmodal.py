@@ -169,7 +169,7 @@ def generate_graphic(year, week_day, month, grupo_etario, show_by_week_day):
     else:
         injury_type_df = cases_df.groupby(["DIA_SEMANA", "TIPO_DELITO"]).size().reset_index(name="Casos")
         fig = px.bar(
-            injury_type_df,
+            injury_type_df.sort_values(by="Casos", ascending=False),
             x="DIA_SEMANA",
             y="Casos",
             color="TIPO_DELITO",
