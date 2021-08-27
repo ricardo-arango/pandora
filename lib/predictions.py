@@ -41,12 +41,12 @@ predictions_container = dbc.Container(
                         dbc.Tabs(
                             [
                                 dbc.Tab(
-                                    label="Lesiones Fatales",
+                                    label="Tipo de delito",
                                     tab_id="deadly-injuries-tab",
                                     labelClassName="tabs-font",
                                     activeLabelClassName="tabs-font-selected"),
                                 dbc.Tab(
-                                    label="Violencia Sexual",
+                                    label="Top delitos por comuna",
                                     tab_id="sexual-violence-tab",
                                     labelClassName="tabs-font",
                                     activeLabelClassName="tabs-font-selected"),

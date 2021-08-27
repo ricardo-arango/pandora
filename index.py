@@ -6,7 +6,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
 from app import app
-from lib import sidebar, content, navbar, home, predictions, tools, about
+from lib import sidebar, content, navbar, home, sexualviolence, predictions, tools, about
 
 # ################################################################################
 # Set app layout
@@ -20,6 +20,8 @@ app.layout = html.Div([dcc.Location(id="url"), navbar.navbar, sidebar.sidebar, c
 def render_page_content(pathname):
     if pathname == "/" or pathname == "":
         return home.home_container
+    elif pathname == "/sexualviolence":
+        return sexualviolence.sexual_violence_container
     elif pathname == "/predictions":
         return predictions.predictions_container
     elif pathname == "/tools":
