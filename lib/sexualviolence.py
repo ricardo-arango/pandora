@@ -93,7 +93,7 @@ sexual_violence_container = dbc.Container(
                     [
                         html.Div(
                             [
-                                html.H5("Casos relacionados con violencia sexual", className="tile-title"),
+                                html.H5("Porcentaje de casos relacionados con violencia sexual", className="tile-title"),
                                 html.Hr(),
                                 dbc.Row(
                                 [
@@ -139,12 +139,10 @@ sexual_violence_container = dbc.Container(
 
 @app.callback(
     Output("sex_violence_graph_table", "figure"),
-    [
-        Input("sex_violence_view_type", "value"),
-
-    ],
+    Input("sex_violence_view_type", "value"),
+    State("sex_violence_view_type", "options")
 )
-def plot_heat_map(view_type):
+def plot_heat_map(view_type, opt):
     cases_df = dataloading.crime_df.copy()
     cases_df.loc[:, 'TIPO_DELITO'] = cases_df['TIPO_DELITO'].str.capitalize()
     if view_type != "AÑO":
@@ -160,8 +158,15 @@ def plot_heat_map(view_type):
         'x': cross_df.columns.tolist(),
         'y': cross_df.index.tolist()
     }
+
+    x_label = [x['label'] for x in opt if x['value'] == view_type]
     fig = go.Figure(
-        data=go.Heatmap(dictionary, colorscale="blues"),
+        data=go.Heatmap(
+            dictionary,
+            colorscale="blues",
+            colorbar=dict(title='Casos'),
+            hovertemplate=x_label[0] + ": %{x}<br>Tipo delito: %{y}<br>Casos: %{z}<extra></extra>"
+        ),
     )
     fig.update_xaxes(dtick="FECHA", ticklabelmode="period")
     fig.update_layout(
