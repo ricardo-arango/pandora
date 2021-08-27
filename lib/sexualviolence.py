@@ -1,40 +1,73 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-import numpy as np
 import dataloading
-import seaborn as sns
 from app import app
-from dataloading import spunit_db, months
-from datetime import date
+from dataloading import spunit_db, barrio_geojson
 from dash.dependencies import Input, Output, State
-from lib import applicationconstants
-from lib.FeatureCard import FeatureCard
 
-voi = ['ACCESO CARNAL ABUSIVO CON MENOR DE 14 AÑOS',
-       'ACCESO CARNAL ABUSIVO CON MENOR DE 14 AÑOS (CIRCUNSTANCIAS AGRAVACIÓN)',
-       'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON INCAPAZ DE RESISTIR',
-       'ACCESO CARNAL O ACTO SEXUAL EN PERSONA PUESTA EN INCAPACIDAD DE RESISTIR',
-       'ACCESO CARNAL VIOLENTO',
-       'ACCESO CARNAL VIOLENTO (CIRCUNSTANCIAS AGRAVACIÓN)',
-       'ACOSO SEXUAL',
-       'ACTO SEXUAL VIOLENTO',
-       'ACTO SEXUAL VIOLENTO (CIRCUNSTANCIAS DE AGRAVACIÓN)',
-       'ACTOS SEXUALES CON MENOR DE 14 AÑOS',
-       'ACTOS SEXUALES CON MENOR DE 14 AÑOS (CIRCUNSTANCIAS DE AGRAVACIÓN)',
-       'CONSTREÑIMIENTO A LA PROSTITUCIÓN',
-       'DEMANDA DE EXPLOTACION SEXUAL COMERCIAL DE PERSONA MENOR DE 18 AÑOS DE EDAD',
-       'ESTÍMULO A LA PROSTITUCIÓN DE MENORES',
-       'FEMINICIDIO',
-       'INDUCCIÓN A LA PROSTITUCIÓN',
-       'LESIONES AL FETO',
-       'PORNOGRAFÍA CON MENORES',
-       'PROXENETISMO CON MENOR DE EDAD',
-       'VIOLENCIA INTRAFAMILIAR']
+voi = ['Acceso carnal abusivo con menor de 14 años',
+ 'Acceso carnal abusivo con menor de 14 años (circunstancias agravación)',
+ 'Acceso carnal o acto sexual abusivo con incapaz de resistir',
+ 'Acceso carnal o acto sexual en persona puesta en incapacidad de resistir',
+ 'Acceso carnal violento',
+ 'Acceso carnal violento (circunstancias agravación)',
+ 'Acoso sexual',
+ 'Acto sexual violento',
+ 'Acto sexual violento (circunstancias de agravación)',
+ 'Actos sexuales con menor de 14 años',
+ 'Actos sexuales con menor de 14 años (circunstancias de agravación)',
+ 'Constreñimiento a la prostitución',
+ 'Demanda de explotacion sexual comercial de persona menor de 18 años de edad',
+ 'Estímulo a la prostitución de menores',
+ 'Feminicidio',
+ 'Inducción a la prostitución',
+ 'Lesiones al feto',
+ 'Pornografía con menores',
+ 'Proxenetismo con menor de edad',
+ 'Violencia intrafamiliar']
+
+view_by = [
+    {"label": "Año", "value": 'AÑO'},
+    {"label": "Mes", "value": 'MES'},
+    {"label": "Tipo de arma", "value": 'TIPO_ARMA'},
+    {"label": "Tipo de lesión", "value": 'TIPO_LESION'},
+    {"label": "Género víctima", "value": 'GENERO_VICTIMA'},
+    {"label": "Día semana", "value": 'DIA_SEMANA'},
+    {"label": "Zona", "value": 'ZONA'},
+    {"label": "Comuna", "value": 'COMUNA'},
+    {"label": "Barrio", "value": spunit_db},
+    {"label": "Grupo etario víctima", "value": 'GRUPO_ETARIO_VICTIMA'}
+]
+
+# @app.callback(
+#     Output("map-plot", "figure"),
+#     State("sex_violence_view_type", "value"),
+# )
+def map_plot():
+    cases_df = dataloading.crime_df.copy()
+    cases_df.loc[:, "TIPO_DELITO"] = cases_df["TIPO_DELITO"].str.capitalize()
+    cases_df = cases_df[cases_df["TIPO_DELITO"].isin(voi)]
+    barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="Casos")
+    fig = px.choropleth(
+        barrio_cn,
+        geojson=barrio_geojson,
+        color="Casos",
+        # color_continuous_scale=px.colors.sequential.Blues,
+        color_continuous_scale=px.colors.sequential.Blues,
+        locations=spunit_db, featureidkey="properties.NOMBRE",
+        projection="mercator"
+    )
+    fig.update_layout(
+        font_family="revert",
+        font_color="#5f5f5f"
+    )
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+    return fig
 
 sexual_violence_container = dbc.Container(
     [
@@ -65,62 +98,21 @@ sexual_violence_container = dbc.Container(
                                 dbc.Row(
                                 [
                                     dbc.Col([
-                                        dbc.Label(applicationconstants.year_label, className="labels-font labels-margin"),
+                                        dbc.Label("Ver por:", className="labels-font labels-margin"),
                                             dcc.Dropdown(
-                                                id="sex_violence_year",
-                                                options=[
-                                                    {"label": col, "value": col} for col in np.append([applicationconstants.all_label], dataloading.crime_df["AÑO"].unique())
-                                                ],
+                                                id="sex_violence_view_type",
+                                                options=view_by,
                                                 clearable=False,
-                                                value=applicationconstants.all_label
+                                                value="AÑO"
                                             ),
-                                    ], width="2"),
-                                    dbc.Col([
-                                        dbc.Label(applicationconstants.month_label, className="labels-font labels-margin"),
-                                        dcc.Dropdown(
-                                            id="sex_violence_month",
-                                            options=months,
-                                            clearable=False,
-                                            value=1
-                                        ),
-                                    ], width="2"),
-                                    dbc.Col([
-                                        dbc.Label(applicationconstants.comuna_label, className="labels-font labels-margin"),
-                                        dcc.Dropdown(
-                                            id="sex_violence_comuna",
-                                            placeholder=applicationconstants.dropdown_placeholder,
-                                            options=[
-                                                {"label": col, "value": col} for col in dataloading.crime_df["COMUNA"].str.capitalize().unique()
-                                            ]
-                                        ),
-                                    ], width="2"),
-                                    dbc.Col([
-                                        dbc.Label(applicationconstants.barrio_label, className="labels-font labels-margin"),
-                                        dcc.Dropdown(
-                                            id="sex_violence_barrio",
-                                            placeholder=applicationconstants.dropdown_placeholder,
-                                            options=[
-                                                {"label": col, "value": col} for col in dataloading.crime_df["BARRIO"].str.title().unique()
-                                            ]
-                                        ),
-                                    ], width="2"),
-                                    dbc.Col([
-                                        dbc.Label(applicationconstants.age_group_label, className="labels-font labels-margin"),
-                                        dcc.Dropdown(
-                                            id="sex_violence_grupoetario",
-                                            placeholder=applicationconstants.dropdown_placeholder,
-                                            options=[
-                                                {"label": col, "value": col} for col in dataloading.crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
-                                            ]
-                                        ),
-                                    ], width="3")
+                                    ], width="4")
                                 ], style={"padding": "0 16px 0 16px"}),
                                 dcc.Graph(id="sex_violence_graph_table")
                             ],
                             className="sex-violence-panel"
                         )
                     ],
-                    width="7"
+                    width="8"
                 ),
                 dbc.Col(
                     [
@@ -129,11 +121,11 @@ sexual_violence_container = dbc.Container(
                                 "Ubicación geográfica",
                                 className="tile-title"),
                             html.Hr(),
-                            dbc.Spinner(dcc.Graph(id="map-plot"), color="info")
+                            dbc.Spinner(dcc.Graph(id="map-plot", figure=map_plot(), style={"width": "101%"}), color="info")
                         ],
                             className="sex-violence-panel"
                         )
-                    ], width="5"
+                    ], width="4"
                 )
             ]
         )
@@ -148,32 +140,35 @@ sexual_violence_container = dbc.Container(
 @app.callback(
     Output("sex_violence_graph_table", "figure"),
     [
-     Input("sex_violence_year", "value"),
-     Input("sex_violence_month", "value"),
-     Input("sex_violence_comuna", "value"),
-     Input("sex_violence_barrio", "value"),
-     Input("sex_violence_grupoetario", "value")
+        Input("sex_violence_view_type", "value"),
+
     ],
 )
-def plot_heat_map(year, month, comuna, barrio, grupo_etario):
-    cases_df = pd.crosstab(
-        index=dataloading.crime_df[dataloading.crime_df["TIPO_DELITO"].isin(voi)]["TIPO_DELITO"],
-        columns=dataloading.crime_df[dataloading.crime_df["TIPO_DELITO"].isin(voi)]["COMUNA"],
+def plot_heat_map(view_type):
+    cases_df = dataloading.crime_df.copy()
+    cases_df.loc[:, 'TIPO_DELITO'] = cases_df['TIPO_DELITO'].str.capitalize()
+    if view_type != "AÑO":
+        cases_df.loc[:, view_type] = cases_df[view_type].str.capitalize()
+
+    cross_df = pd.crosstab(
+        index=cases_df[cases_df["TIPO_DELITO"].isin(voi)]["TIPO_DELITO"],
+        columns=cases_df[cases_df["TIPO_DELITO"].isin(voi)][view_type],
         normalize="index") * 100
-    # cases_df.loc[:, 'TIPO_DELITO'] = cases_df['TIPO_DELITO'].str.capitalize()
-    # cases_df.loc[:, 'COMUNA'] = cases_df['COMUNA'].str.capitalize()
 
     dictionary = {
-        'z': cases_df.values.tolist(),
-        'x': cases_df.columns.tolist(),
-        'y': cases_df.index.tolist()}
-
+        'z': cross_df.values.tolist(),
+        'x': cross_df.columns.tolist(),
+        'y': cross_df.index.tolist()
+    }
     fig = go.Figure(
         data=go.Heatmap(dictionary, colorscale="blues"),
     )
+    fig.update_xaxes(dtick="FECHA", ticklabelmode="period")
     fig.update_layout(
         font_family="revert",
         font_color="#5f5f5f",
-        paper_bgcolor="white"
+        xaxis=go.layout.XAxis(tickangle=45),
+        paper_bgcolor="white",
     )
     return fig
+
