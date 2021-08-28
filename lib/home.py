@@ -123,6 +123,7 @@ def filter_all_years_barplot(dia_semana, barrio, tipo_lesion, grupo_etario, most
             color_continuous_scale=px.colors.sequential.Blues,
             labels={"AÑO": "Año"}
         )
+        barplot_all_years.update_xaxes(range=[min(cases_df['AÑO'])-0.5, max(cases_df['AÑO'])+0.5])
     else:
         filtered_cases = cases_df.groupby('DIA_SEMANA').size().reset_index(name="Casos")
         barplot_all_years = px.bar(
@@ -539,7 +540,7 @@ home_container = dbc.Container(
                                             id="barrio",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in dataloading.crime_df["BARRIO"].str.title().unique()
+                                                {"label": col, "value": col} for col in dataloading.crime_df[spunit_db].str.title().unique()
                                             ]
                                         ),
                                     ], width="3"),

@@ -27,6 +27,14 @@ from app import app
 import dataloading
 
 # ################################################################################
+# Declare and define variables/objects
+# ################################################################################
+db_requirements = pd.DataFrame(data={"COLUMNA": range(1,27),
+                                     "NOMBRE": ["CRIMEN_ID", "FECHA", "AÑO", "MES", "MES_num", "DIA", "DIA_SEMANA", "DIA_SEMANA_num", "LATITUD", "LONGITUD", "ZONA", "COMUNA", "COMUNA_num", "BARRIO", "TIPO_DELITO_ARTICULO", "TIPO_DELITO", "TIPO_CONDUCTA", "TIPO_LESION", "GENERO_VICTIMA", "EDAD_VICTIMA", "GRUPO_ETARIO_VICTIMA", "GRUPO_ETARIO_VICTIMA_num", "ESTADO_CIVIL_VICTIMA", "MEDIO_TRANSPORTE_VICTIMA", "MEDIO_TRANSPORTE_VICTIMARIO", "TIPO_ARMA"],
+                                     "FORMATO": ["dd/mm/aaaa", "Entero", "Entero", "Texto", "Entero", "Entero", "Texto", "Entero", "Decimal", "Decimal", "Texto", "Texto", "Entero", "Texto", "Texto", "Texto", "Texto", "Texto", "Texto", "Entero", "Texto", "Entero", "Texto", "Texto", "Texto", "Texto"],
+                                     "VALOR FALTANTE": ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "En blanco", "En blanco", "NO REPORTA", "NO REPORTA", "0", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "-1", "NO REPORTA", "0", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA"]})
+
+# ################################################################################
 # Declare container components
 # ################################################################################
 tools_container = dbc.Container(
@@ -48,10 +56,42 @@ tools_container = dbc.Container(
                             [
                                 html.H4("El aplicativo usa por defecto una versión ajustada y enriquecida de la base de datos "
                                         "de delitos registrados en Bucaramanga entre enero de 2010 a febrero de 2021 del "
-                                        "repositorio de Datos Abiertos del Gobierno de Colombia. Si el usuario desea considerar "
-                                        "una base de datos diferente para el análisis, debe arastrar y soltar o seleccionar el "
-                                        "archivo en formato csv en el recuadro de abajo."
+                                        "repositorio de Datos Abiertos del Gobierno de Colombia. El enriquecimiento de los datos "
+                                        "consiste en la union espacial de la base de datos con los polígonos de barrios, comunas y "
+                                        "corregimientos y y el cálculo de la distancia de cada delito a la estación de policía más "
+                                        "cercana. Si el usuario desea considerar una base de datos diferente para el análisis, debe "
+                                        "preparar un archivo en formato csv con los campos y formatos que se enlistan a continuación. "
+                                        " Los campos relacionados con la fecha de cada delito no puedne tener datos faltantes."
                                         , className="card-title panel-title"),
+                                html.Hr(),
+                        ])
+                    ], width=12,
+                ),
+                dbc.Col(
+                    [
+                        html.Div(
+                            [
+                                 dash_table.DataTable(
+                                     data=db_requirements.to_dict('records'),
+                                     columns=[{'name': i, 'id': i} for i in db_requirements.columns],
+                                     style_cell={'textAlign': 'left'},
+                                     style_header={'backgroundColor': 'white', 'fontWeight': 'bold'}
+                                 ),
+                                html.Hr(),
+                        ])
+                    ], width=12,
+                ),
+                dbc.Col(
+                    [
+                        html.Div(
+                            [
+                                html.H4("Arrastre y sulte en el recuadro de abajo o seleccione el archivo que desea "
+                                        "considerar para el análisis. Tenga en cuenta que el procesamiento y enriquecimiento "
+                                        "de los datos puede tardar varios minutos. Una vez procesados, el aplicativo "
+                                        "mostrará el nombre del archivo subido y la fecha de la última vez "
+                                        "que fue modificado."
+                                        , className="card-title panel-title"),
+                                html.Hr(),
                         ])
                     ], width=12,
                 ),
@@ -62,7 +102,7 @@ tools_container = dbc.Container(
                                 id='upload-data',
                                 children=html.Div([
                                     'Arrastrar y Soltar o ',
-                                    html.A('Seleccionar Archivo')
+                                    html.A('Seleccionar Archivo', style={'color': 'blue'})
                                 ]),
                                 style={
                                     'width': '100%',
@@ -74,7 +114,6 @@ tools_container = dbc.Container(
                                     'textAlign': 'center',
                                     'margin': '10px'
                                 },
-                                # Allow multiple files to be uploaded
                                 multiple=False
                             ),
                             html.Div(id='output-data-upload'),
@@ -142,11 +181,24 @@ def parse_contents(contents, filename, date):
             dataloading.crime_df.loc[np.array(crime_spunits["CRIMEN_ID"] - 1), dataloading.spunit_db] = np.array(crime_spunits[dataloading.spunit_js])
             dataloading.crime_df[dataloading.spunit_db] = dataloading.crime_df[dataloading.spunit_db].fillna("NO REPORTA")
 
-            # Identify nearest police station to each crime in database
-            tree = BallTree(dataloading.police_geojson[['LATITUD', 'LONGITUD']].values, metric=lambda u, v: distance.distance(u, v).km)
-            distances, indices = tree.query(dataloading.crime_df[['LATITUD', 'LONGITUD']].fillna(0).values, k = 1)
-            dataloading.crime_df['DISTANCIA_ESTACION_POLICIA_CERCANA'] = distances
-            dataloading.crime_df['ESTACION_POLICIA_CERCANA'] = np.array(dataloading.police_geojson["NOMBRE"][np.concatenate(indices, axis=0)])
+            # Convert WGS84 lat/lon coordinates (degrees) to WGS84-UTM 18N coordinates (meters)
+            projected_police_station = dataloading.police_geojson.to_crs("EPSG:32618")
+            projected_crime_coordinates = crime_coordinates.to_crs("EPSG:32618")
+
+            # Identify nearest police station by lineal distance
+            dist2police = pd.DataFrame()
+            for i in projected_police_station.index:
+                x1 = projected_police_station["geometry"].x[i]
+                y1 = projected_police_station["geometry"].y[i]
+                dist2police[i] = np.sqrt((projected_crime_coordinates["geometry"].x - x1) ** 2 +
+                                         (projected_crime_coordinates["geometry"].y - y1) ** 2)
+            mindist = dist2police.min(axis=1, skipna=True).replace(np.inf, np.nan) / 1000
+            nearps = dist2police.idxmin(axis=1, skipna=True)
+            dataloading.crime_df["DISTANCIA_ESTACION_POLICIA_CERCANA"] = mindist
+            dataloading.crime_df["ESTACION_POLICIA_CERCANA"] = dataloading.police_geojson.loc[nearps.values, "NOMBRE"].values
+
+            # Release memory of unnecessary objects
+            del mindist, nearps, dist2police, x1, y1, projected_police_station, projected_crime_coordinates, crime_coordinates, crime_spunits
 
             # Reorder dataframe columns
             dataloading.crime_df = dataloading.crime_df[['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA', 'DIA_SEMANA_num',
@@ -165,14 +217,6 @@ def parse_contents(contents, filename, date):
     return html.Div([
         html.H5(filename),
         html.H6(datetime.datetime.fromtimestamp(date)),
-
-        # dash_table.DataTable(
-        #     data=dataloading.crime_df.to_dict('records'),
-        #     columns=[{'name': i, 'id': i} for i in dataloading.crime_df.columns]
-        # ),
-
-        #html.Hr(),  # horizontal line
-
     ])
 
 # ################################################################################
