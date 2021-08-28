@@ -121,7 +121,7 @@ modal_instance = dbc.Modal(
     ]
 )
 def generate_graphic(year, week_day, month, grupo_etario, show_by_week_day):
-    cases_df = dataloading.crime_df[dataloading.crime_df["TIPO_DELITO"] == "VIOLENCIA INTRAFAMILAR"]
+    cases_df = dataloading.crime_df[dataloading.crime_df["TIPO_DELITO"] == "VIOLENCIA INTRAFAMILIAR"]
     if not year:
         year = 2010
 
@@ -145,7 +145,6 @@ def generate_graphic(year, week_day, month, grupo_etario, show_by_week_day):
     # This if means the "Mostrar por día de la semana" toggle is off
     if len(show_by_week_day) == 1:
         injury_type_df = cases_df.groupby([spunit_db]).size().reset_index(name="Casos")
-        injury_type_df = injury_type_df.sort_values(by="Casos", ascending=False)
         fig = px.bar(
             injury_type_df,
             x=spunit_db,
