@@ -185,3 +185,27 @@ def render_tab_content(active_tab):
         elif active_tab == "sexual-violence-tab":
             return sexual_violence_container
     return deadly_injuries_container
+
+
+def plot_predictions(month, comuna, barrio):
+  month_pred = monthPrediction(10, 'MORRORICO', 'CORREGIMIENTO 1')
+
+  plt.figure(figsize=(22,10))
+  plt.title("{}, {}.   Prediccion de delitos.".format('Agosto', 'Morrico - Corregimiento 1'))
+
+  to_plot = {}
+  for i in range(len(tipo_delito)):
+    for e in range(len(month_pred)):
+      if month_pred[tipo_delito[i]][e] > 0:
+        to_plot[tipo_delito[i]] = [1]
+        break
+      else:
+        to_plot[tipo_delito[i]] = [0]
+
+  plot_df = pd.DataFrame(to_plot)
+  for i in range(len(plot_df.columns)):
+    if plot_df[plot_df.columns[i]][0] == 1:
+      plt.plot(month_pred['DIA'], month_pred[plot_df.columns[i]], label=plot_df.columns[i])
+
+  plt.legend()
+  plt.show()
