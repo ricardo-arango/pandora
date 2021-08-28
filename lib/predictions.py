@@ -17,7 +17,7 @@ from lib import applicationconstants
 from dataloading import crime_df
 from tensorflow import keras
 
-model = keras.models.load_model('data/predictive/saved_model.pb')
+model = keras.models.load_model('data/neural_model.h5')
 raw_data = dataloading.crime_df.copy()
 raw_data['COMUNA'] = raw_data['COMUNA'].str.strip()
 raw_data['UNIDAD_ESPACIAL'] = raw_data['UNIDAD_ESPACIAL'].str.strip()
