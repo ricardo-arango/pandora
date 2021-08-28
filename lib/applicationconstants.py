@@ -1,6 +1,7 @@
 all_label = "Todos"
 dropdown_placeholder = "Seleccionar..."
 show_week_day_label = "Mostrar por día de la semana"
+show_barrio_label = "Mostrar por día barrio"
 year_label = "Año:"
 month_label = "Mes:"
 week_day_label = "Día de la semana:"
