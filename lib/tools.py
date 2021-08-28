@@ -181,11 +181,24 @@ def parse_contents(contents, filename, date):
             dataloading.crime_df.loc[np.array(crime_spunits["CRIMEN_ID"] - 1), dataloading.spunit_db] = np.array(crime_spunits[dataloading.spunit_js])
             dataloading.crime_df[dataloading.spunit_db] = dataloading.crime_df[dataloading.spunit_db].fillna("NO REPORTA")
 
-            # Identify nearest police station to each crime in database
-            tree = BallTree(dataloading.police_geojson[['LATITUD', 'LONGITUD']].values, metric=lambda u, v: distance.distance(u, v).km)
-            distances, indices = tree.query(dataloading.crime_df[['LATITUD', 'LONGITUD']].fillna(0).values, k = 1)
-            dataloading.crime_df['DISTANCIA_ESTACION_POLICIA_CERCANA'] = distances
-            dataloading.crime_df['ESTACION_POLICIA_CERCANA'] = np.array(dataloading.police_geojson["NOMBRE"][np.concatenate(indices, axis=0)])
+            # Convert WGS84 lat/lon coordinates (degrees) to WGS84-UTM 18N coordinates (meters)
+            projected_police_station = dataloading.police_geojson.to_crs("EPSG:32618")
+            projected_crime_coordinates = crime_coordinates.to_crs("EPSG:32618")
+
+            # Identify nearest police station by lineal distance
+            dist2police = pd.DataFrame()
+            for i in projected_police_station.index:
+                x1 = projected_police_station["geometry"].x[i]
+                y1 = projected_police_station["geometry"].y[i]
+                dist2police[i] = np.sqrt((projected_crime_coordinates["geometry"].x - x1) ** 2 +
+                                         (projected_crime_coordinates["geometry"].y - y1) ** 2)
+            mindist = dist2police.min(axis=1, skipna=True).replace(np.inf, np.nan) / 1000
+            nearps = dist2police.idxmin(axis=1, skipna=True)
+            dataloading.crime_df["DISTANCIA_ESTACION_POLICIA_CERCANA"] = mindist
+            dataloading.crime_df["ESTACION_POLICIA_CERCANA"] = dataloading.police_geojson.loc[nearps.values, "NOMBRE"].values
+
+            # Release memory of unnecessary objects
+            del mindist, nearps, dist2police, x1, y1, projected_police_station, projected_crime_coordinates, crime_coordinates, crime_spunits
 
             # Reorder dataframe columns
             dataloading.crime_df = dataloading.crime_df[['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA', 'DIA_SEMANA_num',
