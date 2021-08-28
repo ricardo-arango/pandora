@@ -17,3 +17,4 @@ psycopg2
 pygeos
 scipy
 seaborn
+tensorflow==2.5.0
