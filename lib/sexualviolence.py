@@ -5,9 +5,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import dataloading
+from lib import applicationconstants
 from app import app
 from dataloading import spunit_db, barrio_geojson
 from dash.dependencies import Input, Output, State
+
 
 voi = ['Acceso carnal abusivo con menor de 14 años',
  'Acceso carnal abusivo con menor de 14 años (circunstancias agravación)',
@@ -40,7 +42,8 @@ view_by = [
     {"label": "Zona", "value": 'ZONA'},
     {"label": "Comuna", "value": 'COMUNA'},
     {"label": "Barrio", "value": spunit_db},
-    {"label": "Grupo etario víctima", "value": 'GRUPO_ETARIO_VICTIMA'}
+    {"label": "Grupo etario víctima", "value": 'GRUPO_ETARIO_VICTIMA'},
+    {"label": "Estado civil víctima", "value": 'ESTADO_CIVIL_VICTIMA'}
 ]
 
 # @app.callback(
@@ -121,6 +124,16 @@ sexual_violence_container = dbc.Container(
                                 "Ubicación geográfica",
                                 className="tile-title"),
                             html.Hr(),
+                                dbc.Row(
+                                [
+                                    dbc.Col([
+                                        dbc.Label(applicationconstants.crime_type_label, className="labels-font labels-margin"),
+                                            dcc.Dropdown(
+                                                id="sex_violence_crime_type",
+                                                options=dataloading.crime_df["TIPO_DELITO"].str.capitalize().unique
+                                            ),
+                                    ], width="4")
+                                ], style={"padding": "0 16px 0 16px"}),
                             dbc.Spinner(dcc.Graph(id="map-plot", figure=map_plot(), style={"width": "101%"}), color="info")
                         ],
                             className="sex-violence-panel"

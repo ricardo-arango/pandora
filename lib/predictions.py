@@ -6,19 +6,18 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
 import dataloading
+
 from dataloading import months
 from app import app
 from dataloading import crime_df, police_df, barrio_geojson, spunit_db, spunit_js
 from datetime import date
 from dash.dependencies import Input, Output, State
-
 from lib import applicationconstants
 from dataloading import crime_df
-
 from tensorflow import keras
-model = keras.models.load_model('data/Neural_net_Mintic.h5')
+
+model = keras.models.load_model('data/predictive/saved_model.pb')
 raw_data = dataloading.crime_df.copy()
 raw_data['COMUNA'] = raw_data['COMUNA'].str.strip()
 raw_data['UNIDAD_ESPACIAL'] = raw_data['UNIDAD_ESPACIAL'].str.strip()
@@ -29,24 +28,17 @@ raw_data.dropna(inplace=True)
 
 nn_data = raw_data[['MES_num', 'DIA', 'DIA_SEMANA_num', 'UNIDAD_ESPACIAL', 'COMUNA', 'TIPO_DELITO', 'AÑO', 'DIA_SEMANA']]
 data_group = nn_data.groupby(by=['AÑO','MES_num', 'DIA', 'DIA_SEMANA', 'COMUNA', 'UNIDAD_ESPACIAL','TIPO_DELITO']).count().reset_index().sort_values(by=['TIPO_DELITO'])
-
-
 data_delitos = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
 model_data = data_delitos[data_delitos['AÑO'] >= 2019].copy()
 model_data.drop(['AÑO'], axis=1, inplace=True)
 model_data.rename(columns={'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON INCAPAZ DE RESISTIR': 'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON PERSONA EN INCAPACIDAD DE RESISTIR'}, inplace=True)
 
-
 # Diccionario con todos las columnas de input = 0
 tipo_delito = data_group['TIPO_DELITO'].unique()
-area_espacial =data_group['UNIDAD_ESPACIAL'].unique()
+area_espacial = data_group['UNIDAD_ESPACIAL'].unique()
 
 model_input = model_data.drop(tipo_delito, axis=1).columns
 model_output = model_data[tipo_delito].columns
-
-
-
-
 
 predictions_container = dbc.Container(
     [
