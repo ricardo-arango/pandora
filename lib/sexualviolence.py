@@ -89,7 +89,7 @@ sexual_violence_container = dbc.Container(
                             className="sex-violence-panel"
                         )
                     ],
-                    width="8"
+                    width="7"
                 ),
                 dbc.Col(
                     [
@@ -110,11 +110,12 @@ sexual_violence_container = dbc.Container(
                                             ),
                                     ], width="12")
                                 ], style={"padding": "0 16px 0 16px"}),
-                            dbc.Spinner(dcc.Graph(id="sexual-violence-map-plot", style={"width": "101%"}), color="info")
+                                html.Br(), html.Br(),
+                                dbc.Spinner(dcc.Graph(id="sexual-violence-map-plot"), color="info")
                         ],
                             className="sex-violence-panel"
                         )
-                    ], width="4"
+                    ], width="5"
                 )
             ]
         )
@@ -154,7 +155,7 @@ def plot_heat_map(view_type, opt):
             dictionary,
             colorscale="blues",
             colorbar=dict(title='Casos'),
-            hovertemplate=x_label[0] + ": %{x}<br>Tipo delito: %{y}<br>Porcentaje casos: %{z}<extra></extra>"
+            hovertemplate=x_label[0] + ": %{x}<br>Tipo delito: %{y}<br>Porcentaje casos: %{z}<extra></extra>",
         ),
     )
     fig.update_xaxes(dtick="FECHA", ticklabelmode="period")
@@ -163,6 +164,8 @@ def plot_heat_map(view_type, opt):
         font_color="#5f5f5f",
         xaxis=go.layout.XAxis(tickangle=45),
         paper_bgcolor="white",
+        width=990,
+        height=500
     )
     return fig
 
