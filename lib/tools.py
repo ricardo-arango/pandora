@@ -154,11 +154,21 @@ update_csv_container = dbc.Container(
                                     ),
                                     dbc.Col(
                                         [
-                                            dbc.Spinner(
-                                                html.Div([
-                                                    html.H4(id="filename-uploaded", className="tile-title"),
-                                                    html.H5(id="date-uploaded", className="tile-title"),
-                                                ],id='output-data-upload'), color="info", type="grow", fullscreen=True),
+                                            html.Br(),
+                                            dbc.Spinner(dbc.Alert(
+                                                [
+                                                    html.Div([
+                                                        html.H4(id="alert-title", className="alert-heading"),
+                                                        html.Hr(),
+                                                        html.P(id="filename-uploaded"),
+                                                        html.P(id="date-uploaded"),
+                                                    ], id='output-data-upload')
+                                                ],
+                                                id="uploaded-alert",
+                                                dismissable=True,
+                                                fade=False,
+                                                is_open=False,
+                                            ), color="info", type="grow", fullscreen=True),
                                         ], width=12,
                                     )
                                 ], style={"padding": "0 16px 0 16px"})
@@ -279,16 +289,33 @@ def parse_contents(contents, filename, date):
 @app.callback(
     [
         Output('filename-uploaded', 'children'),
-        Output('date-uploaded', 'children')
+        Output('date-uploaded', 'children'),
+        Output('alert-title', 'children'),
+        Output('uploaded-alert', 'is_open'),
+        Output('uploaded-alert', 'color'),
     ],
     Input('upload-data', 'contents'),
     State('upload-data', 'filename'),
-    State('upload-data', 'last_modified'))
-def update_output(list_of_contents, list_of_names, list_of_dates):
-    file_name = ''
-    file_date = ''
+    State('upload-data', 'last_modified'),
+    State('uploaded-alert', 'is_open'),
+)
+def update_output(list_of_contents, list_of_names, list_of_dates, is_open):
+    file_name = None
+    file_date = None
+    box_color = 'success'
+    is_open = False
+    alert_title = 'Actualización exitosa.'
     if list_of_contents is not None:
         file_name, file_date = parse_contents(list_of_contents, list_of_names, list_of_dates)
         print(file_name, file_date)
-    return file_name, file_date
+    if file_date is None:
+        is_open = False
+    elif file_date == '':
+        is_open = True
+        box_color = 'danger'
+        alert_title = 'Error en la actualización.'
+    else:
+        is_open = True
+
+    return file_name, file_date, alert_title, is_open, box_color
 
