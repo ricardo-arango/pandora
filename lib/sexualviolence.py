@@ -13,7 +13,7 @@ from dash.dependencies import Input, Output, State
 
 voi = ['Acceso carnal abusivo con menor de 14 años',
  'Acceso carnal abusivo con menor de 14 años (circunstancias agravación)',
- 'Acceso carnal o acto sexual abusivo con incapaz de resistir',
+ 'Acceso carnal o acto sexual abusivo con persona en incapacidad de resistir',
  'Acceso carnal o acto sexual en persona puesta en incapacidad de resistir',
  'Acceso carnal violento',
  'Acceso carnal violento (circunstancias agravación)',

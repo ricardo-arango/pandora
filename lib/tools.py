@@ -197,7 +197,7 @@ def parse_contents(contents, filename, date):
             dataloading.crime_df["DISTANCIA_ESTACION_POLICIA_CERCANA"] = mindist
             dataloading.crime_df["ESTACION_POLICIA_CERCANA"] = dataloading.police_geojson.loc[nearps.values, "NOMBRE"].values
 
-            # Release memory of unnecessary objects
+            # Release memory from unnecessary objects
             del mindist, nearps, dist2police, x1, y1, projected_police_station, projected_crime_coordinates, crime_coordinates, crime_spunits
 
             # Reorder dataframe columns
