@@ -171,7 +171,6 @@ def plot_heat_map(view_type, opt):
     Input("sex_violence_crime_type", "value"),
 )
 def map_plot(crime_type):
-    print(crime_type)
     cases_df = dataloading.crime_df.copy()
     cases_df.loc[:, "TIPO_DELITO"] = cases_df["TIPO_DELITO"].str.capitalize()
     cases_df = cases_df[cases_df["TIPO_DELITO"] == crime_type]

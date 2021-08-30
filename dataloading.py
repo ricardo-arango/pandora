@@ -82,6 +82,7 @@ try:
     crime_df = crime_df.astype(dtypes)
     cursor.execute('select * from estacion_policia')
     police_df = pd.DataFrame(cursor.fetchall(), columns=police_df_columns)
+    print("Connection successful******************")
 except (Exception, psycopg2.DatabaseError) as error:
     print("Error retrieving data from server: reading data from backup files.")
     print(error)
@@ -99,3 +100,4 @@ column_dtype = pd.api.types.CategoricalDtype(categories=['LUNES', 'MARTES', 'MIÃ
 crime_df["DIA_SEMANA"] = crime_df["DIA_SEMANA"].astype(column_dtype)
 column_dtype = pd.api.types.CategoricalDtype(categories=['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR', 'NO REPORTA'], ordered=True)
 crime_df["GRUPO_ETARIO_VICTIMA"] = crime_df["GRUPO_ETARIO_VICTIMA"].astype(column_dtype)
+print("Finishing adjusting categorical fields******************")

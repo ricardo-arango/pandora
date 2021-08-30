@@ -5,9 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import dataloading
-
 from dataloading import months
 from app import app
 from dataloading import crime_df, police_df, barrio_geojson, spunit_db, spunit_js
@@ -15,30 +13,32 @@ from datetime import date
 from dash.dependencies import Input, Output, State
 from lib import applicationconstants
 from dataloading import crime_df
-from tensorflow import keras
 
-model = keras.models.load_model('data/neural_model.h5')
-raw_data = dataloading.crime_df.copy()
-raw_data['COMUNA'] = raw_data['COMUNA'].str.strip()
-raw_data['UNIDAD_ESPACIAL'] = raw_data['UNIDAD_ESPACIAL'].str.strip()
-raw_data['TIPO_DELITO'] = raw_data['TIPO_DELITO'].str.strip()
-raw_data['UNIDAD_ESPACIAL'].replace({'NO REPORTA': np.nan}, inplace=True)
-raw_data['TIPO_DELITO'].replace({'NO REPORTA': np.nan}, inplace=True)
-raw_data.dropna(inplace=True)
-
-nn_data = raw_data[['MES_num', 'DIA', 'DIA_SEMANA_num', 'UNIDAD_ESPACIAL', 'COMUNA', 'TIPO_DELITO', 'AÑO', 'DIA_SEMANA']]
-data_group = nn_data.groupby(by=['AÑO','MES_num', 'DIA', 'DIA_SEMANA', 'COMUNA', 'UNIDAD_ESPACIAL','TIPO_DELITO']).count().reset_index().sort_values(by=['TIPO_DELITO'])
-data_delitos = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
-model_data = data_delitos[data_delitos['AÑO'] >= 2019].copy()
-model_data.drop(['AÑO'], axis=1, inplace=True)
-model_data.rename(columns={'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON INCAPAZ DE RESISTIR': 'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON PERSONA EN INCAPACIDAD DE RESISTIR'}, inplace=True)
-
-# Diccionario con todos las columnas de input = 0
-tipo_delito = data_group['TIPO_DELITO'].unique()
-area_espacial = data_group['UNIDAD_ESPACIAL'].unique()
-
-model_input = model_data.drop(tipo_delito, axis=1).columns
-model_output = model_data[tipo_delito].columns
+# from tensorflow.keras import models
+#
+#
+# model = models.load_model('data/Neural_net_Mintic.h5')
+# raw_data = pd.read_csv("data/2010-2021.csv", delimiter = ",")
+# raw_data['COMUNA'] = raw_data['COMUNA'].str.strip()
+# raw_data['UNIDAD_ESPACIAL'] = raw_data['UNIDAD_ESPACIAL'].str.strip()
+# raw_data['TIPO_DELITO'] = raw_data['TIPO_DELITO'].str.strip()
+# raw_data['UNIDAD_ESPACIAL'].replace({'NO REPORTA': np.nan}, inplace=True)
+# raw_data['TIPO_DELITO'].replace({'NO REPORTA': np.nan}, inplace=True)
+# raw_data.dropna(inplace=True)
+#
+# nn_data = raw_data[['MES_num', 'DIA', 'DIA_SEMANA_num', 'UNIDAD_ESPACIAL', 'COMUNA', 'TIPO_DELITO', 'AÑO', 'DIA_SEMANA']]
+# data_group = nn_data.groupby(by=['AÑO','MES_num', 'DIA', 'DIA_SEMANA', 'COMUNA', 'UNIDAD_ESPACIAL','TIPO_DELITO']).count().reset_index().sort_values(by=['TIPO_DELITO'])
+# data_delitos = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
+# model_data = data_delitos[data_delitos['AÑO'] >= 2019].copy()
+# model_data.drop(['AÑO'], axis=1, inplace=True)
+# model_data.rename(columns={'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON INCAPAZ DE RESISTIR': 'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON PERSONA EN INCAPACIDAD DE RESISTIR'}, inplace=True)
+#
+# # Diccionario con todos las columnas de input = 0
+# tipo_delito = data_group['TIPO_DELITO'].unique()
+# area_espacial = data_group['UNIDAD_ESPACIAL'].unique()
+#
+# model_input = model_data.drop(tipo_delito, axis=1).columns
+# model_output = model_data[tipo_delito].columns
 
 predictions_container = dbc.Container(
     [
@@ -95,7 +95,7 @@ deadly_injuries_container = dbc.Container(
                         html.Br(),
                         html.Div(
                             [
-                                html.H5("Predicción de lesiones fatales", className="tile-title"),
+                                html.H5("Predicción de delitos", className="tile-title"),
                                 html.Hr(),
                                 dbc.Row(
                                 [
@@ -113,7 +113,7 @@ deadly_injuries_container = dbc.Container(
                                             id="predict-comuna",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in crime_df["COMUNA"].str.title().unique()
+                                                # {"label": col, "value": col} for col in raw_data["COMUNA"].astype('str').str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="2"),
@@ -123,12 +123,12 @@ deadly_injuries_container = dbc.Container(
                                             id="predict-barrio",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in crime_df["BARRIO"].str.title().unique()
+                                                # {"label": col, "value": col} for col in raw_data["BARRIO"].astype('str').str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="2"),
                                 ], style={"padding": "0 16px 0 16px"}),
-                                dcc.Graph(id="predict-graph1", style={"height": "74%"}),
+                                dcc.Graph(id="predictions-graph1", style={"height": "74%"}),
                             ],
                             className="panel-st-3"
                         )
@@ -173,12 +173,12 @@ sexual_violence_container = dbc.Container(
                                             id="predict-violence-delito",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in crime_df["TIPO_DELITO"].str.capitalize().unique()
+                                                # {"label": col, "value": col} for col in raw_data["TIPO_DELITO"]
                                             ]
                                         ),
                                     ], width="3"),
                                 ], style={"padding": "0 16px 0 16px"}),
-                                dcc.Graph(id="predict-graph1", style={"height": "74%"}),
+                                dcc.Graph(id="predictions-graph2", style={"height": "74%"}),
                             ],
                             className="panel-st-3"
                         )
@@ -384,7 +384,7 @@ def monthPrediction(mes, comuna, espacial):
 
 
 @app.callback(
-    Output("sexviolence-graph", "figure"),
+    Output("predictions-graph1", "figure"),
     [
      Input("predict-month", "value"),
      Input("predict-comuna", "value"),
@@ -394,10 +394,8 @@ def monthPrediction(mes, comuna, espacial):
 def plot_predictions(month, comuna, barrio):
     fig = go.Figure()
     if month is not None and comuna is not None and barrio is not None:
-        month_pred = monthPrediction(month, comuna, barrio)
-        tipo_delito_columns = month_pred.copy()
-        tipo_delito_columns.drop(['DIA', 'MES', 'DIA_SEMANA', 'COMUNA', 'UNIDAD_ESPACIAL'], axis=1, inplace=True)
-        tipo_delito = tipo_delito_columns.columns
+        date_month = date(2021, month, 1).strftime("%B")
+        month_pred = monthPrediction(month, comuna.upper(), barrio.upper())
         to_plot = {}
         for i in range(len(tipo_delito)):
             for e in range(len(month_pred)):
@@ -406,15 +404,26 @@ def plot_predictions(month, comuna, barrio):
                     break
             else:
                 to_plot[tipo_delito[i]] = [0]
+
         plot_df = pd.DataFrame(to_plot)
         for i in range(len(plot_df.columns)):
             if plot_df[plot_df.columns[i]][0] == 1:
-                fig.add_trace(
-                    go.Scatter(
-                        x=month_pred['DIA'],
-                        y=month_pred[plot_df.columns[i]],
-                        mode='lines',
-                        name=plot_df.columns[i].capitalize()
-                    )
-                )
+                fig.add_trace(go.Scatter(
+                    x=month_pred['DIA'],
+                    y=month_pred[plot_df.columns[i]],
+                     mode='lines',
+                     name=plot_df.columns[i].capitalize()
+                ))
+
+        # Edit the layout
+        fig.update_layout(
+            xaxis_title='Mes',
+            yaxis_title='Casos',
+            font_family="revert",
+            font_color="#5f5f5f",
+            paper_bgcolor="white"
+        )
+        fig.update_xaxes(dtick="FECHA", ticklabelmode="period")
+        # Edit the legend
+
     return fig
