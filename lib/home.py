@@ -354,53 +354,7 @@ def get_cases_by_police_station(search_btn_clicks, year, month):
     )
     return bar_plot
 
-
-# @app.callback(
-#     Output("est-policia-barrio", "figure"),
-#     Input("search-btn", "n_clicks"),
-#     [
-#         State("year", "value"),
-#         State("month", "value"),
-#     ]
-# )
 def plot_scatter_police_stations_by_barrio():
-    # cases_df = dataloading.crime_df[(dataloading.crime_df["AÑO"] == year) & (dataloading.crime_df["MES_num"] == month)]
-    # police_stations_df = police_df.copy()
-    # cases_df = cases_df.rename(columns={'ESTACION_POLICIA_CERCANA': 'ESTACION_POLICIA'})
-    # police_stations_df = police_stations_df.rename(columns={'NOMBRE': 'ESTACION_POLICIA'})
-    # police_stations_df = police_stations_df.rename(columns={'LATITUD': 'LATITUD_ESTACION_POLICIA'})
-    # police_stations_df = police_stations_df.rename(columns={'LONGITUD': 'LONGITUD_ESTACION_POLICIA'})
-    # df = pd.merge(cases_df, police_stations_df, on='ESTACION_POLICIA')
-    # scatter_df = df.groupby(["ESTACION_POLICIA", spunit_db, "LATITUD_ESTACION_POLICIA", "LONGITUD_ESTACION_POLICIA"])["CRIMEN_ID"].count().reset_index(name="Casos")
-    # scatter_df.loc[:, "ESTACION_POLICIA"] = scatter_df["ESTACION_POLICIA"].str.title()
-    # fig_sca = px.scatter_geo(
-    #     scatter_df,
-    #     lat="LATITUD_ESTACION_POLICIA",
-    #     lon="LONGITUD_ESTACION_POLICIA",
-    #     hover_name="ESTACION_POLICIA",
-    #     size="Casos",
-    #     labels={"LATITUD_ESTACION_POLICIA": "Latitud", "LONGITUD_ESTACION_POLICIA": "Longitud"}
-    # )
-    # barrios_df = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="Casos")
-    # fig_choro = px.choropleth(
-    #     barrios_df,
-    #     geojson=barrio_geojson,
-    #     color="Casos",
-    #     color_continuous_scale=px.colors.sequential.deep,
-    #     locations=spunit_db, featureidkey="properties.NOMBRE",
-    #     projection="mercator",
-    #     labels={spunit_db: "Barrio"}
-    # )
-    # fig_choro.update_layout(
-    #     font_family="revert",
-    #     font_color="#5f5f5f"
-    # )
-    # fig_choro.update_geos(fitbounds="locations", visible=False)
-    # fig_choro.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-    #
-    # fig_choro.add_trace(fig_sca.data[0])
-    # return fig_choro
-
     police_df.loc[:, 'NOMBRE'] = police_df['NOMBRE'].str.title()
     fig = px.density_mapbox(
         police_df,

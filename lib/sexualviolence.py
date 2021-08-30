@@ -182,7 +182,8 @@ def map_plot(crime_type):
         # color_continuous_scale=px.colors.sequential.Blues,
         color_continuous_scale=px.colors.sequential.Blues,
         locations=spunit_db, featureidkey="properties.NOMBRE",
-        projection="mercator"
+        projection="mercator",
+        labels={spunit_db: "Barrio"}
     )
     fig.update_layout(
         font_family="revert",

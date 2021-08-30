@@ -29,14 +29,25 @@ import dataloading
 # ################################################################################
 # Declare and define variables/objects
 # ################################################################################
-db_requirements = pd.DataFrame(data={"COLUMNA": range(1,27),
+db_requirements = pd.DataFrame(data={"COLUMNA": range(1, 27),
                                      "NOMBRE": ["CRIMEN_ID", "FECHA", "AÑO", "MES", "MES_num", "DIA", "DIA_SEMANA", "DIA_SEMANA_num", "LATITUD", "LONGITUD", "ZONA", "COMUNA", "COMUNA_num", "BARRIO", "TIPO_DELITO_ARTICULO", "TIPO_DELITO", "TIPO_CONDUCTA", "TIPO_LESION", "GENERO_VICTIMA", "EDAD_VICTIMA", "GRUPO_ETARIO_VICTIMA", "GRUPO_ETARIO_VICTIMA_num", "ESTADO_CIVIL_VICTIMA", "MEDIO_TRANSPORTE_VICTIMA", "MEDIO_TRANSPORTE_VICTIMARIO", "TIPO_ARMA"],
                                      "FORMATO": ["dd/mm/aaaa", "Entero", "Entero", "Texto", "Entero", "Entero", "Texto", "Entero", "Decimal", "Decimal", "Texto", "Texto", "Entero", "Texto", "Texto", "Texto", "Texto", "Texto", "Texto", "Entero", "Texto", "Entero", "Texto", "Texto", "Texto", "Texto"],
                                      "VALOR FALTANTE": ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "En blanco", "En blanco", "NO REPORTA", "NO REPORTA", "0", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "-1", "NO REPORTA", "0", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA"]})
 
+notice_label = "Pandora usa por defecto una versión ajustada y enriquecida de la base de datos de delitos registrados en Bucaramanga " \
+"entre Enero de 2010 y Febrero de 2021 del repositorio de Datos Abiertos del Gobierno de Colombia. El enriquecimiento de los datos " \
+"consiste en la union espacial de la base de datos con los polígonos de barrios, comunas y corregimientos y y el cálculo de la distancia " \
+"de cada delito a la estación de policía más cercana. Si el usuario desea considerar una base de datos diferente para el análisis, debe " \
+"preparar un archivo en formato csv con los campos y formatos que se muestran a continuación. Los campos relacionados con la fecha de " \
+"cada delito no puede tener datos faltantes."
+
+drag_drop_notice_label = "Arrastre y sulte el archivo en el recuadro de abajo o haga click para seleccionar el archivo que desea considerar " \
+"para el análisis. Tenga en cuenta que el procesamiento y enriquecimiento de los datos puede tardar varios minutos. Una vez procesados, " \
+"Pandora mostrará el nombre del archivo subido y la fecha de la última vez que fue modificado."
 # ################################################################################
 # Declare container components
 # ################################################################################
+
 tools_container = dbc.Container(
     [
         dbc.Row(
@@ -45,90 +56,138 @@ tools_container = dbc.Container(
                     [
                         html.Div(
                             [
-                                html.H3("Herramientas", className="card-title panel-title"),
-                                html.Hr()
-                        ])
-                    ], width=12,
-                ),
-                dbc.Col(
-                    [
-                        html.Div(
-                            [
-                                html.H4("El aplicativo usa por defecto una versión ajustada y enriquecida de la base de datos "
-                                        "de delitos registrados en Bucaramanga entre enero de 2010 a febrero de 2021 del "
-                                        "repositorio de Datos Abiertos del Gobierno de Colombia. El enriquecimiento de los datos "
-                                        "consiste en la union espacial de la base de datos con los polígonos de barrios, comunas y "
-                                        "corregimientos y y el cálculo de la distancia de cada delito a la estación de policía más "
-                                        "cercana. Si el usuario desea considerar una base de datos diferente para el análisis, debe "
-                                        "preparar un archivo en formato csv con los campos y formatos que se enlistan a continuación. "
-                                        " Los campos relacionados con la fecha de cada delito no puedne tener datos faltantes."
-                                        , className="card-title panel-title"),
+                                html.H3("Herramientas", className="card-title",
+                                    style={"font-family": "revert", "color": "#5f5f5f", "margin-left": "5px"}
+                                ),
                                 html.Hr(),
                         ])
                     ], width=12,
                 ),
+            ]
+        ),
+        dbc.Row(
+            [
                 dbc.Col(
                     [
-                        html.Div(
+                        dbc.Tabs(
                             [
-                                 dash_table.DataTable(
-                                     data=db_requirements.to_dict('records'),
-                                     columns=[{'name': i, 'id': i} for i in db_requirements.columns],
-                                     style_cell={'textAlign': 'left'},
-                                     style_header={'backgroundColor': 'white', 'fontWeight': 'bold'}
-                                 ),
-                                html.Hr(),
-                        ])
+                                dbc.Tab(
+                                    label="Actualizar archivo CSV",
+                                    tab_id="update-csv-tab",
+                                    labelClassName="tabs-font",
+                                    activeLabelClassName="tabs-font-selected")
+                            ],
+                            id="tabs",
+                            active_tab="update-csv-tab",
+                        ),
+                        html.Div(id="tools-tab-content"),
                     ], width=12,
                 ),
-                dbc.Col(
-                    [
-                        html.Div(
-                            [
-                                html.H4("Arrastre y sulte en el recuadro de abajo o seleccione el archivo que desea "
-                                        "considerar para el análisis. Tenga en cuenta que el procesamiento y enriquecimiento "
-                                        "de los datos puede tardar varios minutos. Una vez procesados, el aplicativo "
-                                        "mostrará el nombre del archivo subido y la fecha de la última vez "
-                                        "que fue modificado."
-                                        , className="card-title panel-title"),
-                                html.Hr(),
-                        ])
-                    ], width=12,
-                ),
-                dbc.Col(
-                    [
-                        html.Div([
-                            dcc.Upload(
-                                id='upload-data',
-                                children=html.Div([
-                                    'Arrastrar y Soltar o ',
-                                    html.A('Seleccionar Archivo', style={'color': 'blue'})
-                                ]),
-                                style={
-                                    'width': '100%',
-                                    'height': '60px',
-                                    'lineHeight': '60px',
-                                    'borderWidth': '1px',
-                                    'borderStyle': 'dashed',
-                                    'borderRadius': '5px',
-                                    'textAlign': 'center',
-                                    'margin': '10px'
-                                },
-                                multiple=False
-                            ),
-                            html.Div(id='output-data-upload'),
-                        ])
-                    ], width=12,
-                )
             ]
         ),
     ],
+    fluid=True
+)
+
+update_csv_container = dbc.Container(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Div(
+                            [
+                                html.H5("Actualización de base de datos de casos", className="tile-title"),
+                                html.Hr(),
+                                dbc.Row(
+                                [
+                                    dbc.Col(
+                                        [
+                                            html.Div(
+                                                [
+                                                    html.H6(notice_label
+                                                            , className="tools-notice"),
+                                                    html.Br(),
+                                            ])
+                                        ], width=12,
+                                    ),
+                                    dbc.Col(
+                                        [
+                                            html.Div(
+                                                [
+                                                     dash_table.DataTable(
+                                                         data=db_requirements.to_dict('records'),
+                                                         columns=[{'name': i, 'id': i} for i in db_requirements.columns],
+                                                         style_cell={'textAlign': 'left'},
+                                                         style_header={
+                                                             'fontWeight': 'bold'
+                                                         }
+                                                     ),
+                                                    html.Br(),
+                                            ])
+                                        ], width=12,
+                                    ),
+                                    dbc.Col(
+                                        [
+                                            html.Div(
+                                                [
+                                                    html.H6(drag_drop_notice_label, className="tools-notice"),
+                                                    html.Br(),
+                                            ])
+                                        ], width=12,
+                                    ),
+                                    dbc.Col(
+                                        [
+                                            html.Div([
+                                                dcc.Upload(
+                                                    id='upload-data',
+                                                    children=html.Div([
+                                                        'Arrastrar y Soltar o ',
+                                                        html.A('Seleccionar Archivo', style={'color': '#1074f1'})
+                                                    ]),
+                                                    className="drag-n-drop-panel",
+                                                    multiple=False
+                                                )
+                                            ])
+                                        ], width=12,
+                                    ),
+                                    dbc.Col(
+                                        [
+                                            dbc.Spinner(
+                                                html.Div([
+                                                    html.H4(id="filename-uploaded", className="tile-title"),
+                                                    html.H5(id="date-uploaded", className="tile-title"),
+                                                ],id='output-data-upload'), color="info", type="grow", fullscreen=True),
+                                        ], width=12,
+                                    )
+                                ], style={"padding": "0 16px 0 16px"})
+                            ],
+                            className="panel-st-3"
+                        )
+                    ],
+                    width="12"
+                )
+            ]
+        )
+    ],
+    id="update-csv-container",
     fluid=True,
     style={
         "width": "100%",
         "background": "#f8f9fa"
     }
 )
+
+@app.callback(
+    Output("tools-tab-content", "children"),
+    Input("tabs", "active_tab"),
+)
+def render_tab_content(active_tab):
+    if active_tab is not None:
+        if active_tab == "update-csv-tab":
+            return update_csv_container
+    return update_csv_container
 
 # ################################################################################
 # Declare functions
@@ -210,24 +269,26 @@ def parse_contents(contents, filename, date):
 
     except Exception as e:
         print(e)
-        return html.Div([
-            'Hubo un error procesando el archivo. Asegúrese de que este siga los requerimientos anteriormente descritos.'
-        ])
+        return 'Hubo un error procesando el archivo. Asegúrese de que este siga los requerimientos anteriormente descritos.', ''
 
-    return html.Div([
-        html.H5(filename),
-        html.H6(datetime.datetime.fromtimestamp(date)),
-    ])
+    return filename, datetime.datetime.fromtimestamp(date)
 
 # ################################################################################
 # Declare callbacks
 # ################################################################################
-@app.callback(Output('output-data-upload', 'children'),
-              Input('upload-data', 'contents'),
-              State('upload-data', 'filename'),
-              State('upload-data', 'last_modified'))
+@app.callback(
+    [
+        Output('filename-uploaded', 'children'),
+        Output('date-uploaded', 'children')
+    ],
+    Input('upload-data', 'contents'),
+    State('upload-data', 'filename'),
+    State('upload-data', 'last_modified'))
 def update_output(list_of_contents, list_of_names, list_of_dates):
+    file_name = ''
+    file_date = ''
     if list_of_contents is not None:
-        children = [parse_contents(list_of_contents, list_of_names, list_of_dates)]
-        return children
+        file_name, file_date = parse_contents(list_of_contents, list_of_names, list_of_dates)
+        print(file_name, file_date)
+    return file_name, file_date
 

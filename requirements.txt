@@ -18,3 +18,5 @@ pygeos
 scipy
 seaborn
 tensorflow==2.5.0
+rtree
+pygeos

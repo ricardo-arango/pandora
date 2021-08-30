@@ -158,3 +158,21 @@
     background: white;
     border-radius: 10px;
 }
+
+.tools-notice {
+    color: #5f5f5f;
+    text-align: justify;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.drag-n-drop-panel {
+    line-height: 500%;
+    border-width: 1px;
+    border-style: dashed;
+    border-color: gray;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+}
