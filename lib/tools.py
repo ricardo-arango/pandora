@@ -206,7 +206,7 @@ def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     try:
-        if '.csv' in filename:
+        if filename.endswith(".csv"):
             # Load and adjust user crime database
             dtypes = {"CRIMEN_ID": "int64",
                       "AÑO": "int64",
@@ -233,22 +233,22 @@ def parse_contents(contents, filename, date):
                       "MEDIO_TRANSPORTE_VICTIMA": "category",
                       "MEDIO_TRANSPORTE_VICTIMARIO": "category",
                       "TIPO_ARMA": "category"}
-            dataloading.crime_df = pd.read_csv(io.StringIO(decoded.decode('utf-8'))).astype(dtypes)
+            file_to_save = pd.read_csv(io.StringIO(decoded.decode('utf-8'))).astype(dtypes)
 
             # Adjust value order of several categorical fields
             column_dtype = pd.api.types.CategoricalDtype(categories=['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'], ordered=True)
-            dataloading.crime_df["MES"] = dataloading.crime_df["MES"].astype(column_dtype)
+            file_to_save["MES"] = file_to_save["MES"].astype(column_dtype)
             column_dtype = pd.api.types.CategoricalDtype(categories=['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'], ordered=True)
-            dataloading.crime_df["DIA_SEMANA"] = dataloading.crime_df["DIA_SEMANA"].astype(column_dtype)
+            file_to_save["DIA_SEMANA"] = file_to_save["DIA_SEMANA"].astype(column_dtype)
             column_dtype = pd.api.types.CategoricalDtype(categories=['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR', 'NO REPORTA'], ordered=True)
-            dataloading.crime_df["GRUPO_ETARIO_VICTIMA"] = dataloading.crime_df["GRUPO_ETARIO_VICTIMA"].astype(column_dtype)
+            file_to_save["GRUPO_ETARIO_VICTIMA"] = file_to_save["GRUPO_ETARIO_VICTIMA"].astype(column_dtype)
 
             # Join spatial units with crime database
-            crime_coordinates = geopandas.GeoDataFrame(dataloading.crime_df[["CRIMEN_ID", "BARRIO", "COMUNA"]], crs='epsg:4326', geometry=geopandas.points_from_xy(dataloading.crime_df.LONGITUD, dataloading.crime_df.LATITUD))
+            crime_coordinates = geopandas.GeoDataFrame(file_to_save[["CRIMEN_ID", "BARRIO", "COMUNA"]], crs='epsg:4326', geometry=geopandas.points_from_xy(file_to_save.LONGITUD, file_to_save.LATITUD))
             crime_spunits = sjoin(crime_coordinates, dataloading.barrio_geojson, how="left")
-            dataloading.crime_df.loc[:, dataloading.spunit_db] = np.nan
-            dataloading.crime_df.loc[np.array(crime_spunits["CRIMEN_ID"] - 1), dataloading.spunit_db] = np.array(crime_spunits[dataloading.spunit_js])
-            dataloading.crime_df[dataloading.spunit_db] = dataloading.crime_df[dataloading.spunit_db].fillna("NO REPORTA")
+            file_to_save.loc[:, dataloading.spunit_db] = np.nan
+            file_to_save.loc[np.array(crime_spunits["CRIMEN_ID"] - 1), dataloading.spunit_db] = np.array(crime_spunits[dataloading.spunit_js])
+            file_to_save[dataloading.spunit_db] = file_to_save[dataloading.spunit_db].fillna("NO REPORTA")
 
             # Convert WGS84 lat/lon coordinates (degrees) to WGS84-UTM 18N coordinates (meters)
             projected_police_station = dataloading.police_geojson.to_crs("EPSG:32618")
@@ -263,25 +263,28 @@ def parse_contents(contents, filename, date):
                                          (projected_crime_coordinates["geometry"].y - y1) ** 2)
             mindist = dist2police.min(axis=1, skipna=True).replace(np.inf, np.nan) / 1000
             nearps = dist2police.idxmin(axis=1, skipna=True)
-            dataloading.crime_df["DISTANCIA_ESTACION_POLICIA_CERCANA"] = mindist
-            dataloading.crime_df["ESTACION_POLICIA_CERCANA"] = dataloading.police_geojson.loc[nearps.values, "NOMBRE"].values
+            file_to_save["DISTANCIA_ESTACION_POLICIA_CERCANA"] = mindist
+            file_to_save["ESTACION_POLICIA_CERCANA"] = dataloading.police_geojson.loc[nearps.values, "NOMBRE"].values
 
             # Release memory from unnecessary objects
             del mindist, nearps, dist2police, x1, y1, projected_police_station, projected_crime_coordinates, crime_coordinates, crime_spunits
 
             # Reorder dataframe columns
-            dataloading.crime_df = dataloading.crime_df[['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA', 'DIA_SEMANA_num',
+            file_to_save = file_to_save[['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA', 'DIA_SEMANA_num',
                                  'LATITUD', 'LONGITUD', 'ZONA', 'COMUNA', 'COMUNA_num', 'BARRIO', dataloading.spunit_db,
                                  'TIPO_DELITO_ARTICULO', 'TIPO_DELITO', 'TIPO_CONDUCTA', 'TIPO_LESION',
                                  'GENERO_VICTIMA', 'EDAD_VICTIMA', 'GRUPO_ETARIO_VICTIMA', 'GRUPO_ETARIO_VICTIMA_num',
                                  'ESTADO_CIVIL_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMARIO', 'TIPO_ARMA',
                                  'DISTANCIA_ESTACION_POLICIA_CERCANA', 'ESTACION_POLICIA_CERCANA']]
+            dataloading.crime_df = pd.DataFrame(file_to_save)
+        else:
+            return 'El archivo debe tener la extensión .csv', ''
 
     except Exception as e:
         print(e)
         return 'Hubo un error procesando el archivo. Asegúrese de que este siga los requerimientos anteriormente descritos.', ''
 
-    return filename, datetime.datetime.fromtimestamp(date)
+    return 'Nombre de archivo: ' + filename, 'Última fecha de actualización de archivo: ' + datetime.datetime.fromtimestamp(date).strftime('%d/%m/%Y')
 
 # ################################################################################
 # Declare callbacks
