@@ -113,7 +113,7 @@ deadly_injuries_container = dbc.Container(
                                             id="predict-comuna",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
+                                                # {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="2"),
@@ -123,7 +123,7 @@ deadly_injuries_container = dbc.Container(
                                             id="predict-barrio",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
+                                                # {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="2"),

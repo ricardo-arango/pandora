@@ -42,6 +42,11 @@ class FeatureCard:
                                     id="number-cases-count")
                             ], width="7"),
                             dbc.Col([
+                                dbc.Tooltip(
+                                    "Ver mas...",
+                                    target=self.icon_id,
+                                    placement="right"
+                                ),
                                 html.Div(
                                     html.I(
                                         className=self.icon,
