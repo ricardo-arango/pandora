@@ -14,28 +14,28 @@ from dash.dependencies import Input, Output, State
 from lib import applicationconstants
 from dataloading import crime_df
 
-# from tensorflow.keras import models
-#
-#
+from tensorflow.keras import models
+
+
 # model = models.load_model('data/Neural_net_Mintic.h5')
 # raw_data = pd.read_csv("data/2010-2021.csv", delimiter = ",")
-# raw_data['COMUNA'] = raw_data['COMUNA'].str.strip()
-# raw_data['UNIDAD_ESPACIAL'] = raw_data['UNIDAD_ESPACIAL'].str.strip()
-# raw_data['TIPO_DELITO'] = raw_data['TIPO_DELITO'].str.strip()
-# raw_data['UNIDAD_ESPACIAL'].replace({'NO REPORTA': np.nan}, inplace=True)
-# raw_data['TIPO_DELITO'].replace({'NO REPORTA': np.nan}, inplace=True)
+# raw_data[applicationconstants.COMUNA] = raw_data[applicationconstants.COMUNA].str.strip()
+# raw_data[applicationconstants.UNIDAD_ESPACIAL] = raw_data[applicationconstants.UNIDAD_ESPACIAL].str.strip()
+# raw_data[applicationconstants.TIPO_DELITO] = raw_data[applicationconstants.TIPO_DELITO].str.strip()
+# raw_data[applicationconstants.UNIDAD_ESPACIAL].replace({'NO REPORTA': np.nan}, inplace=True)
+# raw_data[applicationconstants.TIPO_DELITO].replace({'NO REPORTA': np.nan}, inplace=True)
 # raw_data.dropna(inplace=True)
 #
-# nn_data = raw_data[['MES_num', 'DIA', 'DIA_SEMANA_num', 'UNIDAD_ESPACIAL', 'COMUNA', 'TIPO_DELITO', 'AÑO', 'DIA_SEMANA']]
-# data_group = nn_data.groupby(by=['AÑO','MES_num', 'DIA', 'DIA_SEMANA', 'COMUNA', 'UNIDAD_ESPACIAL','TIPO_DELITO']).count().reset_index().sort_values(by=['TIPO_DELITO'])
+# nn_data = raw_data[[applicationconstants.MES_num, applicationconstants.DIA, applicationconstants.DIA_SEMANA_num, applicationconstants.UNIDAD_ESPACIAL, applicationconstants.COMUNA, applicationconstants.TIPO_DELITO, applicationconstants.AÑO, applicationconstants.DIA_SEMANA]]
+# data_group = nn_data.groupby(by=[applicationconstants.AÑO,applicationconstants.MES_num, applicationconstants.DIA, applicationconstants.DIA_SEMANA, applicationconstants.COMUNA, applicationconstants.UNIDAD_ESPACIAL,applicationconstants.TIPO_DELITO]).count().reset_index().sort_values(by=[applicationconstants.TIPO_DELITO])
 # data_delitos = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
-# model_data = data_delitos[data_delitos['AÑO'] >= 2019].copy()
-# model_data.drop(['AÑO'], axis=1, inplace=True)
+# model_data = data_delitos[data_delitos[applicationconstants.AÑO] >= 2019].copy()
+# model_data.drop([applicationconstants.AÑO], axis=1, inplace=True)
 # model_data.rename(columns={'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON INCAPAZ DE RESISTIR': 'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON PERSONA EN INCAPACIDAD DE RESISTIR'}, inplace=True)
 #
 # # Diccionario con todos las columnas de input = 0
-# tipo_delito = data_group['TIPO_DELITO'].unique()
-# area_espacial = data_group['UNIDAD_ESPACIAL'].unique()
+# tipo_delito = data_group[applicationconstants.TIPO_DELITO].unique()
+# area_espacial = data_group[applicationconstants.UNIDAD_ESPACIAL].unique()
 #
 # model_input = model_data.drop(tipo_delito, axis=1).columns
 # model_output = model_data[tipo_delito].columns
@@ -113,7 +113,7 @@ deadly_injuries_container = dbc.Container(
                                             id="predict-comuna",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                # {"label": col, "value": col} for col in raw_data["COMUNA"].astype('str').str.capitalize().unique()
+                                                {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="2"),
@@ -123,7 +123,7 @@ deadly_injuries_container = dbc.Container(
                                             id="predict-barrio",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                # {"label": col, "value": col} for col in raw_data["BARRIO"].astype('str').str.capitalize().unique()
+                                                {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="2"),
@@ -173,7 +173,7 @@ sexual_violence_container = dbc.Container(
                                             id="predict-violence-delito",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                # {"label": col, "value": col} for col in raw_data["TIPO_DELITO"]
+                                                # {"label": col, "value": col} for col in raw_data[applicationconstants.TIPO_DELITO]
                                             ]
                                         ),
                                     ], width="3"),
@@ -208,22 +208,6 @@ def render_tab_content(active_tab):
         elif active_tab == "sexual-violence-tab":
             return sexual_violence_container
     return deadly_injuries_container
-
-
-def monthPrediction(mes, comuna, espacial):
-  short_months = [2]
-  medium_months = [4, 6, 9, 11]
-  long_months = [1, 3, 5, 7, 8, 9, 10, 12]
-  week_days = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO']
-
-  if mes in short_months:
-    month_days = 28
-  elif mes in medium_months:
-    month_days = 30
-  elif mes in long_months:
-    month_days = 31
-  else:
-    return 'Invalid month input'
 
 
 # Predecir casos para un mes y locacion en particular.
@@ -294,8 +278,8 @@ def monthPrediction(mes, comuna, espacial):
             base[key] = value
 
         # Adding input into dictionary for predictions.
-        base['MES'] = [mes]
-        base['DIA'] = [i]
+        base[applicationconstants.MES] = [mes]
+        base[applicationconstants.DIA] = [i]
         base[day_week] = [1]
         base[comuna] = [1]
         base[espacial] = [1]
@@ -344,11 +328,11 @@ def monthPrediction(mes, comuna, espacial):
         violencia_familiar.append(predictions[0][29])
 
     result = pd.DataFrame({
-        'MES': mes_df,
-        'DIA': dia_df,
-        'DIA_SEMANA': dia_semana_df,
-        'COMUNA': comuna_df,
-        'UNIDAD_ESPACIAL': espacial_df,
+        applicationconstants.MES: mes_df,
+        applicationconstants.DIA: dia_df,
+        applicationconstants.DIA_SEMANA: dia_semana_df,
+        applicationconstants.COMUNA: comuna_df,
+        applicationconstants.UNIDAD_ESPACIAL: espacial_df,
         'ACCESO CARNAL ABUSIVO CON MENOR DE 14 AÑOS': sexual_abusivo,
         'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON PERSONA EN INCAPACIDAD DE RESISTIR': sexual_incapacidad,
         'ACCESO CARNAL O ACTO SEXUAL EN PERSONA PUESTA EN INCAPACIDAD DE RESISTIR': accesso_carnal,
@@ -409,7 +393,7 @@ def plot_predictions(month, comuna, barrio):
         for i in range(len(plot_df.columns)):
             if plot_df[plot_df.columns[i]][0] == 1:
                 fig.add_trace(go.Scatter(
-                    x=month_pred['DIA'],
+                    x=month_pred[applicationconstants.DIA],
                     y=month_pred[plot_df.columns[i]],
                      mode='lines',
                      name=plot_df.columns[i].capitalize()
