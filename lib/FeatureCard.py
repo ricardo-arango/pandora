@@ -43,7 +43,7 @@ class FeatureCard:
                             ], width="7"),
                             dbc.Col([
                                 dbc.Tooltip(
-                                    "Ver mas...",
+                                    "Ver más...",
                                     target=self.icon_id,
                                     placement="right"
                                 ),
