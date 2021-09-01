@@ -50,8 +50,7 @@ class FeatureCard:
                                 html.Div(
                                     html.I(
                                         className=self.icon,
-                                        style={"padding": self.icon_padding, "color": "#0c5db3"},
-                                        title="Ver más..."),
+                                        style={"padding": self.icon_padding, "color": "#0c5db3"}),
                                     className="card-icon", n_clicks=0,
                                     id=self.icon_id
                                 )
