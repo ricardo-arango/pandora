@@ -13,9 +13,6 @@ pandora_label_p4 = "La opción de predicciones hace posible entender qué tipos 
 pandora_label_p5 = "Herramientas es una opción en donde el usuario puede actualizar la base de datos del repositorio de Datos Abiertos del Gobierno de Colombia."
 
 
-
-
-
 about_container = dbc.Container(
     [
         dbc.Row(

@@ -8,7 +8,7 @@ import numpy as np
 import dataloading
 from dataloading import months
 from app import app
-from dataloading import crime_df, police_df, barrio_geojson, spunit_db, spunit_js
+from dataloading import crime_df, police_df, barrio_geojson
 from datetime import date
 from dash.dependencies import Input, Output, State
 from lib import applicationconstants

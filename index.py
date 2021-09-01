@@ -34,38 +34,6 @@ def render_page_content(pathname):
         return home.home_container
 
 
-# add callback for toggling the collapse on small screens
-@app.callback(
-    Output("navbar-collapse", "is_open"),
-    [Input("navbar-toggler", "n_clicks")],
-    [State("navbar-collapse", "is_open")],
-)
-def toggle_navbar_collapse(n, is_open):
-    if n:
-        return not is_open
-    return is_open
-
-
-@app.callback(
-    Output("positioned-toast", "is_open"),
-    [Input("btn-buscar", "n_clicks")],
-)
-def open_toast(n):
-    if n:
-        return True
-    return False
-
-
-@app.callback(
-    Output("btn-buscar", "disabled"),
-    [Input("buscar-text", "value")],
-)
-def toggle_disabled_search_button(value):
-    if not value:
-        return True
-    return False
-
-
 # Initiate the server where the app will work
 if __name__ == "__main__":
     app.run_server(host='0.0.0.0', port='8050', debug=True)

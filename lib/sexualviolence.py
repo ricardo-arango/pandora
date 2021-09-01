@@ -7,7 +7,7 @@ import pandas as pd
 import dataloading
 from lib import applicationconstants
 from app import app
-from dataloading import spunit_db, barrio_geojson
+from dataloading import barrio_geojson
 from dash.dependencies import Input, Output, State
 
 
@@ -33,17 +33,17 @@ voi = ['Acceso carnal abusivo con menor de 14 años',
  'Violencia intrafamiliar']
 
 view_by = [
-    {"label": "Año", "value": 'AÑO'},
-    {"label": "Mes", "value": 'MES'},
-    {"label": "Tipo de arma", "value": 'TIPO_ARMA'},
-    {"label": "Tipo de lesión", "value": 'TIPO_LESION'},
-    {"label": "Género víctima", "value": 'GENERO_VICTIMA'},
-    {"label": "Día semana", "value": 'DIA_SEMANA'},
-    {"label": "Zona", "value": 'ZONA'},
-    {"label": "Comuna", "value": 'COMUNA'},
-    {"label": "Barrio", "value": spunit_db},
-    {"label": "Grupo etario víctima", "value": 'GRUPO_ETARIO_VICTIMA'},
-    {"label": "Estado civil víctima", "value": 'ESTADO_CIVIL_VICTIMA'}
+    {"label": "Año", "value": applicationconstants.AÑO},
+    {"label": "Mes", "value": applicationconstants.MES},
+    {"label": "Tipo de arma", "value": applicationconstants.TIPO_ARMA},
+    {"label": "Tipo de lesión", "value": applicationconstants.TIPO_LESION},
+    {"label": "Género víctima", "value": applicationconstants.GENERO_VICTIMA},
+    {"label": "Día semana", "value": applicationconstants.DIA_SEMANA},
+    {"label": "Zona", "value": applicationconstants.ZONA},
+    {"label": "Comuna", "value": applicationconstants.COMUNA},
+    {"label": "Barrio", "value": applicationconstants.UNIDAD_ESPACIAL},
+    {"label": "Grupo etario víctima", "value": applicationconstants.GRUPO_ETARIO_VICTIMA},
+    {"label": "Estado civil víctima", "value": applicationconstants.ESTADO_CIVIL_VICTIMA}
 ]
 
 sexual_violence_container = dbc.Container(
@@ -80,7 +80,7 @@ sexual_violence_container = dbc.Container(
                                                 id="sex_violence_view_type",
                                                 options=view_by,
                                                 clearable=False,
-                                                value="AÑO"
+                                                value=applicationconstants.AÑO
                                             ),
                                     ], width="4")
                                 ], style={"padding": "0 16px 0 16px"}),
@@ -134,13 +134,13 @@ sexual_violence_container = dbc.Container(
 )
 def plot_heat_map(view_type, opt):
     cases_df = dataloading.crime_df.copy()
-    cases_df.loc[:, 'TIPO_DELITO'] = cases_df['TIPO_DELITO'].str.capitalize()
-    if view_type != "AÑO":
+    cases_df.loc[:, applicationconstants.TIPO_DELITO] = cases_df[applicationconstants.TIPO_DELITO].str.capitalize()
+    if view_type != applicationconstants.AÑO:
         cases_df.loc[:, view_type] = cases_df[view_type].str.capitalize()
 
     cross_df = pd.crosstab(
-        index=cases_df[cases_df["TIPO_DELITO"].isin(voi)]["TIPO_DELITO"],
-        columns=cases_df[cases_df["TIPO_DELITO"].isin(voi)][view_type],
+        index=cases_df[cases_df[applicationconstants.TIPO_DELITO].isin(voi)][applicationconstants.TIPO_DELITO],
+        columns=cases_df[cases_df[applicationconstants.TIPO_DELITO].isin(voi)][view_type],
         normalize="index") * 100
 
     dictionary = {
@@ -158,7 +158,7 @@ def plot_heat_map(view_type, opt):
             hovertemplate=x_label[0] + ": %{x}<br>Tipo delito: %{y}<br>Porcentaje casos: %{z}<extra></extra>",
         ),
     )
-    fig.update_xaxes(dtick="FECHA", ticklabelmode="period")
+    fig.update_xaxes(dtick=applicationconstants.FECHA, ticklabelmode="period")
     fig.update_layout(
         font_family="revert",
         font_color="#5f5f5f",
@@ -175,18 +175,18 @@ def plot_heat_map(view_type, opt):
 )
 def map_plot(crime_type):
     cases_df = dataloading.crime_df.copy()
-    cases_df.loc[:, "TIPO_DELITO"] = cases_df["TIPO_DELITO"].str.capitalize()
-    cases_df = cases_df[cases_df["TIPO_DELITO"] == crime_type]
-    barrio_cn = cases_df.groupby(spunit_db)["CRIMEN_ID"].count().reset_index(name="Casos")
+    cases_df.loc[:, applicationconstants.TIPO_DELITO] = cases_df[applicationconstants.TIPO_DELITO].str.capitalize()
+    cases_df = cases_df[cases_df[applicationconstants.TIPO_DELITO] == crime_type]
+    barrio_cn = cases_df.groupby(applicationconstants.UNIDAD_ESPACIAL)[applicationconstants.CRIMEN_ID].count().reset_index(name="Casos")
     fig = px.choropleth(
         barrio_cn,
         geojson=barrio_geojson,
         color="Casos",
         # color_continuous_scale=px.colors.sequential.Blues,
         color_continuous_scale=px.colors.sequential.Blues,
-        locations=spunit_db, featureidkey="properties.NOMBRE",
+        locations=applicationconstants.UNIDAD_ESPACIAL, featureidkey="properties.NOMBRE",
         projection="mercator",
-        labels={spunit_db: "Barrio"}
+        labels={applicationconstants.UNIDAD_ESPACIAL: "Barrio"}
     )
     fig.update_layout(
         font_family="revert",

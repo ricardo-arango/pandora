@@ -17,22 +17,53 @@ import dash_table
 import datetime
 import io
 import geopandas
-from geopandas.tools import sjoin
-from geopy import distance
+import dataloading
 import pandas as pd
 import numpy as np
-from sklearn.neighbors import BallTree
+
+from geopandas.tools import sjoin
+from lib import applicationconstants
+
 
 from app import app
-import dataloading
+
 
 # ################################################################################
 # Declare and define variables/objects
 # ################################################################################
-db_requirements = pd.DataFrame(data={"COLUMNA": range(1, 27),
-                                     "NOMBRE": ["CRIMEN_ID", "FECHA", "AÑO", "MES", "MES_num", "DIA", "DIA_SEMANA", "DIA_SEMANA_num", "LATITUD", "LONGITUD", "ZONA", "COMUNA", "COMUNA_num", "BARRIO", "TIPO_DELITO_ARTICULO", "TIPO_DELITO", "TIPO_CONDUCTA", "TIPO_LESION", "GENERO_VICTIMA", "EDAD_VICTIMA", "GRUPO_ETARIO_VICTIMA", "GRUPO_ETARIO_VICTIMA_num", "ESTADO_CIVIL_VICTIMA", "MEDIO_TRANSPORTE_VICTIMA", "MEDIO_TRANSPORTE_VICTIMARIO", "TIPO_ARMA"],
-                                     "FORMATO": ["dd/mm/aaaa", "Entero", "Entero", "Texto", "Entero", "Entero", "Texto", "Entero", "Decimal", "Decimal", "Texto", "Texto", "Entero", "Texto", "Texto", "Texto", "Texto", "Texto", "Texto", "Entero", "Texto", "Entero", "Texto", "Texto", "Texto", "Texto"],
-                                     "VALOR FALTANTE": ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "En blanco", "En blanco", "NO REPORTA", "NO REPORTA", "0", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "-1", "NO REPORTA", "0", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA"]})
+db_requirements = pd.DataFrame(
+    data={
+        "COLUMNA": range(1, 27),
+         "NOMBRE": [
+             applicationconstants.CRIMEN_ID,
+             applicationconstants.FECHA,
+             applicationconstants.AÑO,
+             applicationconstants.MES,
+             applicationconstants.MES_num,
+             applicationconstants.DIA,
+             applicationconstants.DIA_SEMANA,
+             applicationconstants.DIA_SEMANA_num,
+             applicationconstants.LATITUD,
+             applicationconstants.LONGITUD,
+             applicationconstants.ZONA,
+             applicationconstants.COMUNA,
+             applicationconstants.COMUNA_num,
+             applicationconstants.BARRIO,
+             applicationconstants.TIPO_DELITO_ARTICULO,
+             applicationconstants.TIPO_DELITO,
+             applicationconstants.TIPO_CONDUCTA,
+             applicationconstants.TIPO_LESION,
+             applicationconstants.GENERO_VICTIMA,
+             applicationconstants.EDAD_VICTIMA,
+             applicationconstants.GRUPO_ETARIO_VICTIMA,
+             applicationconstants.GRUPO_ETARIO_VICTIMA_num,
+             applicationconstants.ESTADO_CIVIL_VICTIMA,
+             applicationconstants.MEDIO_TRANSPORTE_VICTIMA,
+             applicationconstants.MEDIO_TRANSPORTE_VICTIMARIO,
+             applicationconstants.TIPO_ARMA
+         ],
+         "FORMATO": ["dd/mm/aaaa", "Entero", "Entero", "Texto", "Entero", "Entero", "Texto", "Entero", "Decimal", "Decimal", "Texto", "Texto", "Entero", "Texto", "Texto", "Texto", "Texto", "Texto", "Texto", "Entero", "Texto", "Entero", "Texto", "Texto", "Texto", "Texto"],
+         "VALOR FALTANTE": ["N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "En blanco", "En blanco", "NO REPORTA", "NO REPORTA", "0", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA", "-1", "NO REPORTA", "0", "NO REPORTA", "NO REPORTA", "NO REPORTA", "NO REPORTA"]})
 
 notice_label = "Pandora usa por defecto una versión ajustada y enriquecida de la base de datos de delitos registrados en Bucaramanga " \
 "entre Enero de 2010 y Febrero de 2021 del repositorio de Datos Abiertos del Gobierno de Colombia. El enriquecimiento de los datos " \
@@ -208,47 +239,47 @@ def parse_contents(contents, filename, date):
     try:
         if filename.endswith(".csv"):
             # Load and adjust user crime database
-            dtypes = {"CRIMEN_ID": "int64",
-                      "AÑO": "int64",
-                      "MES": "category",
-                      "MES_num": "int64",
-                      "DIA": "int64",
-                      "DIA_SEMANA": "category",
-                      "DIA_SEMANA_num": "int64",
-                      "LATITUD": "float64",
-                      "LONGITUD": "float64",
-                      "ZONA": "category",
-                      "COMUNA": "category",
-                      "COMUNA_num": "int64",
-                      "BARRIO": "category",
-                      "TIPO_DELITO_ARTICULO": "category",
-                      "TIPO_DELITO": "category",
-                      "TIPO_CONDUCTA": "category",
-                      "TIPO_LESION": "category",
-                      "GENERO_VICTIMA": "category",
-                      "EDAD_VICTIMA": "int64",
-                      "GRUPO_ETARIO_VICTIMA": "category",
-                      "GRUPO_ETARIO_VICTIMA_num": "int64",
-                      "ESTADO_CIVIL_VICTIMA": "category",
-                      "MEDIO_TRANSPORTE_VICTIMA": "category",
-                      "MEDIO_TRANSPORTE_VICTIMARIO": "category",
-                      "TIPO_ARMA": "category"}
+            dtypes = {applicationconstants.CRIMEN_ID: "int64",
+                      applicationconstants.AÑO: "int64",
+                      applicationconstants.MES: "category",
+                      applicationconstants.MES_num: "int64",
+                      applicationconstants.DIA: "int64",
+                      applicationconstants.DIA_SEMANA: "category",
+                      applicationconstants.DIA_SEMANA_num: "int64",
+                      applicationconstants.LATITUD: "float64",
+                      applicationconstants.LONGITUD: "float64",
+                      applicationconstants.ZONA: "category",
+                      applicationconstants.COMUNA: "category",
+                      applicationconstants.COMUNA_num: "int64",
+                      applicationconstants.BARRIO: "category",
+                      applicationconstants.TIPO_DELITO_ARTICULO: "category",
+                      applicationconstants.TIPO_DELITO: "category",
+                      applicationconstants.TIPO_CONDUCTA: "category",
+                      applicationconstants.TIPO_LESION: "category",
+                      applicationconstants.GENERO_VICTIMA: "category",
+                      applicationconstants.EDAD_VICTIMA: "int64",
+                      applicationconstants.GRUPO_ETARIO_VICTIMA: "category",
+                      applicationconstants.GRUPO_ETARIO_VICTIMA_num: "int64",
+                      applicationconstants.ESTADO_CIVIL_VICTIMA: "category",
+                      applicationconstants.MEDIO_TRANSPORTE_VICTIMA: "category",
+                      applicationconstants.MEDIO_TRANSPORTE_VICTIMARIO: "category",
+                      applicationconstants.TIPO_ARMA: "category"}
             file_to_save = pd.read_csv(io.StringIO(decoded.decode('utf-8'))).astype(dtypes)
 
             # Adjust value order of several categorical fields
-            column_dtype = pd.api.types.CategoricalDtype(categories=['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'], ordered=True)
-            file_to_save["MES"] = file_to_save["MES"].astype(column_dtype)
-            column_dtype = pd.api.types.CategoricalDtype(categories=['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'], ordered=True)
-            file_to_save["DIA_SEMANA"] = file_to_save["DIA_SEMANA"].astype(column_dtype)
-            column_dtype = pd.api.types.CategoricalDtype(categories=['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR', 'NO REPORTA'], ordered=True)
-            file_to_save["GRUPO_ETARIO_VICTIMA"] = file_to_save["GRUPO_ETARIO_VICTIMA"].astype(column_dtype)
+            column_dtype = pd.api.types.CategoricalDtype(categories=dataloading.months_caps, ordered=True)
+            file_to_save[applicationconstants.MES] = file_to_save[applicationconstants.MES].astype(column_dtype)
+            column_dtype = pd.api.types.CategoricalDtype(categories=dataloading.week_days_caps, ordered=True)
+            file_to_save[applicationconstants.DIA_SEMANA] = file_to_save[applicationconstants.DIA_SEMANA].astype(column_dtype)
+            column_dtype = pd.api.types.CategoricalDtype(categories=dataloading.age_group_caps, ordered=True)
+            file_to_save[applicationconstants.GRUPO_ETARIO_VICTIMA] = file_to_save[applicationconstants.GRUPO_ETARIO_VICTIMA].astype(column_dtype)
 
             # Join spatial units with crime database
-            crime_coordinates = geopandas.GeoDataFrame(file_to_save[["CRIMEN_ID", "BARRIO", "COMUNA"]], crs='epsg:4326', geometry=geopandas.points_from_xy(file_to_save.LONGITUD, file_to_save.LATITUD))
+            crime_coordinates = geopandas.GeoDataFrame(file_to_save[[applicationconstants.CRIMEN_ID, applicationconstants.BARRIO, applicationconstants.COMUNA]], crs='epsg:4326', geometry=geopandas.points_from_xy(file_to_save.LONGITUD, file_to_save.LATITUD))
             crime_spunits = sjoin(crime_coordinates, dataloading.barrio_geojson, how="left")
-            file_to_save.loc[:, dataloading.spunit_db] = np.nan
-            file_to_save.loc[np.array(crime_spunits["CRIMEN_ID"] - 1), dataloading.spunit_db] = np.array(crime_spunits[dataloading.spunit_js])
-            file_to_save[dataloading.spunit_db] = file_to_save[dataloading.spunit_db].fillna("NO REPORTA")
+            file_to_save.loc[:, applicationconstants.UNIDAD_ESPACIAL] = np.nan
+            file_to_save.loc[np.array(crime_spunits[applicationconstants.CRIMEN_ID] - 1), applicationconstants.UNIDAD_ESPACIAL] = np.array(crime_spunits[applicationconstants.NOMBRE])
+            file_to_save[applicationconstants.UNIDAD_ESPACIAL] = file_to_save[applicationconstants.UNIDAD_ESPACIAL].fillna("NO REPORTA")
 
             # Convert WGS84 lat/lon coordinates (degrees) to WGS84-UTM 18N coordinates (meters)
             projected_police_station = dataloading.police_geojson.to_crs("EPSG:32618")
@@ -263,19 +294,43 @@ def parse_contents(contents, filename, date):
                                          (projected_crime_coordinates["geometry"].y - y1) ** 2)
             mindist = dist2police.min(axis=1, skipna=True).replace(np.inf, np.nan) / 1000
             nearps = dist2police.idxmin(axis=1, skipna=True)
-            file_to_save["DISTANCIA_ESTACION_POLICIA_CERCANA"] = mindist
-            file_to_save["ESTACION_POLICIA_CERCANA"] = dataloading.police_geojson.loc[nearps.values, "NOMBRE"].values
+            file_to_save[applicationconstants.DISTANCIA_ESTACION_POLICIA_CERCANA] = mindist
+            file_to_save[applicationconstants.ESTACION_POLICIA_CERCANA] = dataloading.police_geojson.loc[nearps.values, "NOMBRE"].values
 
             # Release memory from unnecessary objects
             del mindist, nearps, dist2police, x1, y1, projected_police_station, projected_crime_coordinates, crime_coordinates, crime_spunits
 
             # Reorder dataframe columns
-            file_to_save = file_to_save[['CRIMEN_ID', 'FECHA', 'AÑO', 'MES', 'MES_num', 'DIA', 'DIA_SEMANA', 'DIA_SEMANA_num',
-                                 'LATITUD', 'LONGITUD', 'ZONA', 'COMUNA', 'COMUNA_num', 'BARRIO', dataloading.spunit_db,
-                                 'TIPO_DELITO_ARTICULO', 'TIPO_DELITO', 'TIPO_CONDUCTA', 'TIPO_LESION',
-                                 'GENERO_VICTIMA', 'EDAD_VICTIMA', 'GRUPO_ETARIO_VICTIMA', 'GRUPO_ETARIO_VICTIMA_num',
-                                 'ESTADO_CIVIL_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMA', 'MEDIO_TRANSPORTE_VICTIMARIO', 'TIPO_ARMA',
-                                 'DISTANCIA_ESTACION_POLICIA_CERCANA', 'ESTACION_POLICIA_CERCANA']]
+            file_to_save = file_to_save[[
+                applicationconstants.CRIMEN_ID,
+                applicationconstants.FECHA,
+                applicationconstants.AÑO,
+                applicationconstants.MES,
+                applicationconstants.MES_num,
+                applicationconstants.DIA,
+                applicationconstants.DIA_SEMANA,
+                applicationconstants.DIA_SEMANA_num,
+                applicationconstants.LATITUD,
+                applicationconstants.LONGITUD,
+                applicationconstants.ZONA,
+                applicationconstants.COMUNA,
+                applicationconstants.COMUNA_num,
+                applicationconstants.BARRIO,
+                applicationconstants.UNIDAD_ESPACIAL,
+                applicationconstants.TIPO_DELITO_ARTICULO,
+                applicationconstants.TIPO_DELITO,
+                applicationconstants.TIPO_CONDUCTA,
+                applicationconstants.TIPO_LESION,
+                applicationconstants.GENERO_VICTIMA,
+                applicationconstants.EDAD_VICTIMA,
+                applicationconstants.GRUPO_ETARIO_VICTIMA,
+                applicationconstants.GRUPO_ETARIO_VICTIMA_num,
+                applicationconstants.ESTADO_CIVIL_VICTIMA,
+                applicationconstants.MEDIO_TRANSPORTE_VICTIMA,
+                applicationconstants.MEDIO_TRANSPORTE_VICTIMARIO,
+                applicationconstants.TIPO_ARMA,
+                applicationconstants.DISTANCIA_ESTACION_POLICIA_CERCANA,
+                applicationconstants.ESTACION_POLICIA_CERCANA]]
             dataloading.crime_df = pd.DataFrame(file_to_save)
         else:
             return 'El archivo debe tener la extensión .csv', ''

@@ -4,8 +4,8 @@ import dash_core_components as dcc
 import numpy as np
 import plotly.express as px
 import dataloading
+import plotly.graph_objects as go
 
-from dataloading import spunit_db
 from app import app
 from dash.dependencies import Input, Output
 from lib import applicationconstants
@@ -49,7 +49,7 @@ modal_instance = dbc.Modal(
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
                                                         {"label": col, "value": col} for col in
-                                                        dataloading.crime_df["DIA_SEMANA"].str.capitalize().unique()
+                                                        dataloading.crime_df[applicationconstants.DIA_SEMANA].str.capitalize().unique()
                                                     ],
                                                 ),
                                             ], width="3"),
@@ -70,7 +70,7 @@ modal_instance = dbc.Modal(
                                                     placeholder=applicationconstants.dropdown_placeholder,
                                                     options=[
                                                         {"label": col, "value": col} for col in
-                                                        dataloading.crime_df["GRUPO_ETARIO_VICTIMA"].str.capitalize().unique()
+                                                        dataloading.crime_df[applicationconstants.GRUPO_ETARIO_VICTIMA].str.capitalize().unique()
                                                     ]
                                                 ),
                                             ], width="3")
@@ -91,7 +91,7 @@ modal_instance = dbc.Modal(
                                 ],
                                 style={
                                     "width": "100%",
-                                    "height": "100%"
+                                    "height": "103%"
                                 }
                             )
                         ], width="12"
@@ -121,54 +121,55 @@ modal_instance = dbc.Modal(
     ]
 )
 def generate_graphic(year, week_day, month, grupo_etario, show_by_week_day):
-    cases_df = dataloading.crime_df[dataloading.crime_df["TIPO_DELITO"] == "VIOLENCIA INTRAFAMILIAR"]
+    cases_df = dataloading.crime_df[dataloading.crime_df[applicationconstants.TIPO_DELITO] == "VIOLENCIA INTRAFAMILIAR"]
     if not year:
         year = 2010
 
     if year != allYears:
-        cases_df = cases_df[cases_df["AÑO"] == int(year)]
+        cases_df = cases_df[cases_df[applicationconstants.AÑO] == int(year)]
 
-    cases_df.loc[:, spunit_db] = cases_df[spunit_db].str.title()
-    cases_df.loc[:, 'DIA_SEMANA'] = cases_df['DIA_SEMANA'].str.capitalize()
-    cases_df.loc[:, 'TIPO_DELITO'] = cases_df['TIPO_DELITO'].str.capitalize()
-    cases_df.loc[:, 'TIPO_CONDUCTA'] = cases_df['TIPO_CONDUCTA'].str.capitalize()
-    cases_df.loc[:, 'TIPO_LESION'] = cases_df['TIPO_LESION'].str.capitalize()
-    cases_df.loc[:, 'GRUPO_ETARIO_VICTIMA'] = cases_df['GRUPO_ETARIO_VICTIMA'].str.capitalize()
-    cases_df.loc[:, 'MES'] = cases_df['MES'].str.capitalize()
+    cases_df.loc[:, applicationconstants.UNIDAD_ESPACIAL] = cases_df[applicationconstants.UNIDAD_ESPACIAL].str.title()
+    cases_df.loc[:, applicationconstants.DIA_SEMANA] = cases_df[applicationconstants.DIA_SEMANA].str.capitalize()
+    cases_df.loc[:, applicationconstants.TIPO_DELITO] = cases_df[applicationconstants.TIPO_DELITO].str.capitalize()
+    cases_df.loc[:, applicationconstants.TIPO_CONDUCTA] = cases_df[applicationconstants.TIPO_CONDUCTA].str.capitalize()
+    cases_df.loc[:, applicationconstants.TIPO_LESION] = cases_df[applicationconstants.TIPO_LESION].str.capitalize()
+    cases_df.loc[:, applicationconstants.GRUPO_ETARIO_VICTIMA] = cases_df[applicationconstants.GRUPO_ETARIO_VICTIMA].str.capitalize()
+    cases_df.loc[:, applicationconstants.MES] = cases_df[applicationconstants.MES].str.capitalize()
     if month:
         cases_df = cases_df[cases_df["MES_num"] == month]
     if week_day:
-        cases_df = cases_df[cases_df["DIA_SEMANA"] == week_day]
+        cases_df = cases_df[cases_df[applicationconstants.DIA_SEMANA] == week_day]
     if grupo_etario:
-        cases_df = cases_df[cases_df["GRUPO_ETARIO_VICTIMA"] == grupo_etario]
+        cases_df = cases_df[cases_df[applicationconstants.GRUPO_ETARIO_VICTIMA] == grupo_etario]
 
     # This if means the "Mostrar por día de la semana" toggle is off
     if len(show_by_week_day) == 1:
-        injury_type_df = cases_df.groupby([spunit_db]).size().reset_index(name="Casos")
+        injury_type_df = cases_df.groupby([applicationconstants.UNIDAD_ESPACIAL]).size().reset_index(name="Casos")
         fig = px.bar(
             injury_type_df,
-            x=spunit_db,
+            x=applicationconstants.UNIDAD_ESPACIAL,
             y="Casos",
-            color=spunit_db,
+            color=applicationconstants.UNIDAD_ESPACIAL,
             color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
-            labels={spunit_db: "Barrios"},
+            labels={applicationconstants.UNIDAD_ESPACIAL: "Barrios"},
             height=800
         )
     else:
-        injury_type_df = cases_df.groupby(["DIA_SEMANA", "TIPO_DELITO"]).size().reset_index(name="Casos")
+        injury_type_df = cases_df.groupby([applicationconstants.DIA_SEMANA, applicationconstants.TIPO_DELITO]).size().reset_index(name="Casos")
         fig = px.bar(
             injury_type_df.sort_values(by="Casos", ascending=False),
-            x="DIA_SEMANA",
+            x=applicationconstants.DIA_SEMANA,
             y="Casos",
-            color="TIPO_DELITO",
+            color=applicationconstants.TIPO_DELITO,
             color_continuous_scale=["#97bdd4", "rgb(12, 93, 179)"],
-            labels={"DIA_SEMANA": "Día de la semana", "TIPO_DELITO": "Tipo Delito"},
+            labels={applicationconstants.DIA_SEMANA: "Día de la semana", applicationconstants.TIPO_DELITO: "Tipo Delito"},
             height=800
         )
     fig.update_layout(
         font_family="revert",
-        font_color="#5f5f5f"
+        font_color="#5f5f5f",
+        xaxis=go.layout.XAxis(tickangle=45),
+        paper_bgcolor="white"
     )
     fig.update_traces(opacity=0.8)
-    fig.update_layout(paper_bgcolor="white")
     return fig
