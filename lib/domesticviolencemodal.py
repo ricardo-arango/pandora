@@ -86,7 +86,7 @@ modal_instance = dbc.Modal(
                                             ],
                                             className="toggle-font"
                                         ),
-                                        style={"padding-left": "16px", "margin": "-20px 0"}
+                                        style={"padding-left": "16px", "margin": "-14px 0"}
                                     ),
                                 ],
                                 style={
