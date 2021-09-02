@@ -1,44 +1,43 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
-import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-import dataloading
+import joblib
+import plotly.express as px
+
 from dataloading import months
 from app import app
-from dataloading import crime_df, police_df, barrio_geojson
 from datetime import date
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from lib import applicationconstants
-from dataloading import crime_df
-
 from tensorflow.keras import models
 
 
-# model = models.load_model('data/Neural_net_Mintic.h5')
-# raw_data = pd.read_csv("data/2010-2021.csv", delimiter = ",")
-# raw_data[applicationconstants.COMUNA] = raw_data[applicationconstants.COMUNA].str.strip()
-# raw_data[applicationconstants.UNIDAD_ESPACIAL] = raw_data[applicationconstants.UNIDAD_ESPACIAL].str.strip()
-# raw_data[applicationconstants.TIPO_DELITO] = raw_data[applicationconstants.TIPO_DELITO].str.strip()
-# raw_data[applicationconstants.UNIDAD_ESPACIAL].replace({'NO REPORTA': np.nan}, inplace=True)
-# raw_data[applicationconstants.TIPO_DELITO].replace({'NO REPORTA': np.nan}, inplace=True)
-# raw_data.dropna(inplace=True)
-#
-# nn_data = raw_data[[applicationconstants.MES_num, applicationconstants.DIA, applicationconstants.DIA_SEMANA_num, applicationconstants.UNIDAD_ESPACIAL, applicationconstants.COMUNA, applicationconstants.TIPO_DELITO, applicationconstants.AÑO, applicationconstants.DIA_SEMANA]]
-# data_group = nn_data.groupby(by=[applicationconstants.AÑO,applicationconstants.MES_num, applicationconstants.DIA, applicationconstants.DIA_SEMANA, applicationconstants.COMUNA, applicationconstants.UNIDAD_ESPACIAL,applicationconstants.TIPO_DELITO]).count().reset_index().sort_values(by=[applicationconstants.TIPO_DELITO])
-# data_delitos = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
-# model_data = data_delitos[data_delitos[applicationconstants.AÑO] >= 2019].copy()
-# model_data.drop([applicationconstants.AÑO], axis=1, inplace=True)
-# model_data.rename(columns={'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON INCAPAZ DE RESISTIR': 'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON PERSONA EN INCAPACIDAD DE RESISTIR'}, inplace=True)
-#
-# # Diccionario con todos las columnas de input = 0
-# tipo_delito = data_group[applicationconstants.TIPO_DELITO].unique()
-# area_espacial = data_group[applicationconstants.UNIDAD_ESPACIAL].unique()
-#
-# model_input = model_data.drop(tipo_delito, axis=1).columns
-# model_output = model_data[tipo_delito].columns
+raw_data = pd.read_csv('data/2010-2021.csv')
+
+#Neural Network
+model = models.load_model('data/Neural_net_Mintic.h5')
+model_data = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
+raw_data[applicationconstants.TIPO_DELITO].replace({'NO REPORTA': np.nan}, inplace=True)
+raw_data.dropna(inplace=True)
+tipo_delito = raw_data[applicationconstants.TIPO_DELITO].str.strip().unique()
+model_input = model_data.drop(tipo_delito, axis=1).columns
+
+# Tree
+forest_train = pd.read_csv('data/forestTrain.csv', index_col=0)
+rf = joblib.load('data/DelitosRandomForestModel')
+
+# Variables used in functions.
+genero = pd.get_dummies(forest_train[applicationconstants.GENERO_VICTIMA])
+edad = pd.get_dummies(forest_train[applicationconstants.EDAD_VICTIMA])
+comuna = pd.get_dummies(forest_train[applicationconstants.COMUNA])
+espacial = pd.get_dummies(forest_train[applicationconstants.UNIDAD_ESPACIAL])
+forest_data = pd.concat([forest_train, genero, edad, comuna, espacial], axis=1)
+forest_data.drop([applicationconstants.GENERO_VICTIMA, applicationconstants.EDAD_VICTIMA, applicationconstants.COMUNA, applicationconstants.UNIDAD_ESPACIAL, 'VICTIMA_POINT'], axis=1, inplace=True)
+
+
 
 predictions_container = dbc.Container(
     [
@@ -64,18 +63,18 @@ predictions_container = dbc.Container(
                         dbc.Tabs(
                             [
                                 dbc.Tab(
-                                    label="Tipo de delito",
-                                    tab_id="deadly-injuries-tab",
+                                    label="Predicción de delito",
+                                    tab_id="injury-type-tab",
                                     labelClassName="tabs-font",
                                     activeLabelClassName="tabs-font-selected"),
                                 dbc.Tab(
-                                    label="Top delitos por comuna",
-                                    tab_id="sexual-violence-tab",
+                                    label="Ocurrencia de delito",
+                                    tab_id="crime-type-prob-tab",
                                     labelClassName="tabs-font",
                                     activeLabelClassName="tabs-font-selected"),
                             ],
                             id="tabs",
-                            active_tab="deadly-injuries-tab",
+                            active_tab="injury-type-tab",
                         ),
                         html.Div(id="tab-content"),
                     ], width=12,
@@ -86,7 +85,7 @@ predictions_container = dbc.Container(
     fluid=True
 )
 
-deadly_injuries_container = dbc.Container(
+injury_type_container = dbc.Container(
     [
         dbc.Row(
             [
@@ -95,7 +94,7 @@ deadly_injuries_container = dbc.Container(
                         html.Br(),
                         html.Div(
                             [
-                                html.H5("Predicción de delitos", className="tile-title"),
+                                html.H5("Predicción de tipos de delito", className="tile-title"),
                                 html.Hr(),
                                 dbc.Row(
                                 [
@@ -113,7 +112,7 @@ deadly_injuries_container = dbc.Container(
                                             id="predict-comuna",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                # {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
+                                                {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="2"),
@@ -123,12 +122,12 @@ deadly_injuries_container = dbc.Container(
                                             id="predict-barrio",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                # {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
+                                                {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
                                             ]
                                         ),
                                     ], width="2"),
                                 ], style={"padding": "0 16px 0 16px"}),
-                                dcc.Graph(id="predictions-graph1", style={"height": "74%"}),
+                                dcc.Graph(id="predictions-graph", style={"height": "74%"}),
                             ],
                             className="panel-st-3"
                         )
@@ -138,7 +137,7 @@ deadly_injuries_container = dbc.Container(
             ]
         )
     ],
-    id="deadly-injuries-container",
+    id="predictions_container",
     fluid=True,
     style={
         "width": "100%",
@@ -146,7 +145,7 @@ deadly_injuries_container = dbc.Container(
     }
 )
 
-sexual_violence_container = dbc.Container(
+crime_probability_container = dbc.Container(
     [
         dbc.Row(
             [
@@ -155,40 +154,65 @@ sexual_violence_container = dbc.Container(
                         html.Br(),
                         html.Div(
                             [
-                                html.H5("Predicción de violencia sexual", className="tile-title"),
+                                html.H5("Probabilidad de ocurrencia de delito", className="tile-title"),
                                 html.Hr(),
                                 dbc.Row(
                                 [
                                     dbc.Col([
-                                        dbc.Label(applicationconstants.month_label, className="labels-font labels-margin"),
+                                        dbc.Label(applicationconstants.gender_label, className="labels-font labels-margin"),
                                         dcc.Dropdown(
-                                            id="predict-violence-month",
+                                            id="prob-gender",
                                             placeholder=applicationconstants.dropdown_placeholder,
-                                            options=months
+                                            options=[
+                                                {"label": col, "value": col} for col in raw_data[applicationconstants.GENERO_VICTIMA].astype('str').str.capitalize().unique()
+                                            ]
                                         ),
                                     ], width="2"),
                                     dbc.Col([
-                                        dbc.Label(applicationconstants.crime_type_label, className="labels-font labels-margin"),
+                                        dbc.Label(applicationconstants.age_label, className="labels-font labels-margin"),
+                                        # dcc.Input(
+                                        #     id="prob-age",
+                                        #     type="number",
+                                        #     min=1, max=120
+                                        # )
                                         dcc.Dropdown(
-                                            id="predict-violence-delito",
+                                            id="prob-age",
                                             placeholder=applicationconstants.dropdown_placeholder,
                                             options=[
-                                                # {"label": col, "value": col} for col in raw_data[applicationconstants.TIPO_DELITO]
+                                                {"label": col, "value": col} for col in range(1, 111)
                                             ]
                                         ),
-                                    ], width="3"),
+                                    ], width="2"),
+                                    dbc.Col([
+                                        dbc.Label(applicationconstants.comuna_label, className="labels-font labels-margin"),
+                                        dcc.Dropdown(
+                                            id="prob-comuna",
+                                            placeholder=applicationconstants.dropdown_placeholder,
+                                            options=[
+                                                {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
+                                            ]
+                                        ),
+                                    ], width="4"),
+                                    dbc.Col([
+                                        dbc.Label(applicationconstants.barrio_label, className="labels-font labels-margin"),
+                                        dcc.Dropdown(
+                                            id="prob-barrio",
+                                            placeholder=applicationconstants.dropdown_placeholder,
+                                            options=[
+                                                {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
+                                            ]
+                                        ),
+                                    ], width="4"),
                                 ], style={"padding": "0 16px 0 16px"}),
-                                dcc.Graph(id="predictions-graph2", style={"height": "74%"}),
-                            ],
-                            className="panel-st-3"
-                        )
+                                dcc.Graph(id="prob-graph", style={"height": "74%"}),
+                            ], className="panel-st-3"),
                     ],
                     width="12"
                 )
-            ]
-        ),
+            ],
+        )
     ],
-    id="sexual-violence-container",
+    id="crime-probability-container",
     fluid=True,
     style={
         "width": "100%",
@@ -203,16 +227,15 @@ sexual_violence_container = dbc.Container(
 )
 def render_tab_content(active_tab):
     if active_tab is not None:
-        if active_tab == "deadly-injuries-tab":
-            return deadly_injuries_container
-        elif active_tab == "sexual-violence-tab":
-            return sexual_violence_container
-    return deadly_injuries_container
+        if active_tab == "injury-type-tab":
+            return injury_type_container
+        elif active_tab == "crime-type-prob-tab":
+            return crime_probability_container
+    return injury_type_container
 
 
 # Predecir casos para un mes y locacion en particular.
 def monthPrediction(mes, comuna, espacial):
-    model_input = model_data.drop(tipo_delito, axis=1).columns
     short_months = [2]
     medium_months = [4, 6, 9, 11]
     long_months = [1, 3, 5, 7, 8, 9, 10, 12]
@@ -278,8 +301,8 @@ def monthPrediction(mes, comuna, espacial):
             base[key] = value
 
         # Adding input into dictionary for predictions.
-        base[applicationconstants.MES] = [mes]
-        base[applicationconstants.DIA] = [i]
+        base['MES'] = [mes]
+        base['DIA'] = [i]
         base[day_week] = [1]
         base[comuna] = [1]
         base[espacial] = [1]
@@ -328,9 +351,9 @@ def monthPrediction(mes, comuna, espacial):
         violencia_familiar.append(predictions[0][29])
 
     result = pd.DataFrame({
-        applicationconstants.MES: mes_df,
-        applicationconstants.DIA: dia_df,
-        applicationconstants.DIA_SEMANA: dia_semana_df,
+        'MES': mes_df,
+        'DIA': dia_df,
+        'DIA_SEMANA': dia_semana_df,
         applicationconstants.COMUNA: comuna_df,
         applicationconstants.UNIDAD_ESPACIAL: espacial_df,
         'ACCESO CARNAL ABUSIVO CON MENOR DE 14 AÑOS': sexual_abusivo,
@@ -368,7 +391,7 @@ def monthPrediction(mes, comuna, espacial):
 
 
 @app.callback(
-    Output("predictions-graph1", "figure"),
+    Output("predictions-graph", "figure"),
     [
      Input("predict-month", "value"),
      Input("predict-comuna", "value"),
@@ -383,7 +406,7 @@ def plot_predictions(month, comuna, barrio):
         to_plot = {}
         for i in range(len(tipo_delito)):
             for e in range(len(month_pred)):
-                if month_pred[tipo_delito[i]][e] > 0:
+                if month_pred[tipo_delito[i]][e] > 0.1:
                     to_plot[tipo_delito[i]] = [1]
                     break
             else:
@@ -392,22 +415,83 @@ def plot_predictions(month, comuna, barrio):
         plot_df = pd.DataFrame(to_plot)
         for i in range(len(plot_df.columns)):
             if plot_df[plot_df.columns[i]][0] == 1:
-                fig.add_trace(go.Scatter(
-                    x=month_pred[applicationconstants.DIA],
-                    y=month_pred[plot_df.columns[i]],
-                     mode='lines',
-                     name=plot_df.columns[i].capitalize()
-                ))
+                fig.add_trace(go.Scatter(x=month_pred['DIA'], y=month_pred[plot_df.columns[i]],
+                                         mode='lines',
+                                         name=plot_df.columns[i].capitalize()))
 
         # Edit the layout
         fig.update_layout(
-            xaxis_title='Mes',
+            xaxis_title='Día del mes',
             yaxis_title='Casos',
             font_family="revert",
             font_color="#5f5f5f",
             paper_bgcolor="white"
         )
-        fig.update_xaxes(dtick="FECHA", ticklabelmode="period")
-        # Edit the legend
+    return fig
 
+
+def random_forest_probability(genero, edad, comuna, espacial):
+    tipo_delito = ['HURTO A ENTIDADES COMERCIALES', 'HURTO A PERSONAS',
+                   'LESIONES CULPOSAS (EN ACCIDENTE DE TRANSITO)', 'HURTO A RESIDENCIAS',
+                   'LESIONES PERSONALES', 'HURTO A MOTOCICLETAS',
+                   'HOMICIDIO CULPOSO (EN ACCIDENTE DE TRÁNSITO)', 'EXTORSIÓN',
+                   'VIOLENCIA INTRAFAMILIAR', 'HOMICIDIO', 'HURTO A AUTOMOTORES',
+                   'LESIONES CULPOSAS', 'ACTO SEXUAL VIOLENTO', 'ACCESO CARNAL VIOLENTO',
+                   'ACCESO CARNAL O ACTO SEXUAL EN PERSONA PUESTA EN INCAPACIDAD DE RESISTIR',
+                   'FEMINICIDIO', 'HURTO A ABIGEATO',
+                   'ACTOS SEXUALES CON MENOR DE 14 AÑOS',
+                   'ACCESO CARNAL O ACTO SEXUAL ABUSIVO CON PERSONA EN INCAPACIDAD DE RESISTIR',
+                   'LESIONES PERSONALES (CIRCUNSTANCIAS DE AGRAVACIÓN)',
+                   'ACCESO CARNAL ABUSIVO CON MENOR DE 14 AÑOS', 'ACOSO SEXUAL',
+                   'UTILIZACIÓN O FACILITACIÓN DE MEDIOS DE COMUNICACIÓN PARA OFRECER SERVICIOS SEXUALES DE MENORES',
+                   'PORNOGRAFÍA CON MENORES']
+
+    data = forest_data.drop(tipo_delito, axis=1)
+    data_dt = data.loc[0].copy()
+    data_dt.iloc[:] = np.zeros(369)
+    data_dt[genero] = 1
+    data_dt[edad] = 1
+    data_dt[comuna] = 1
+    data_dt[espacial] = 1
+
+    prediction = rf.predict(np.array(data_dt).reshape(1, -1))
+    predictions = {applicationconstants.TIPO_DELITO: tipo_delito, 'PROBABILIDAD': prediction[0]}
+    predictions_df = pd.DataFrame(predictions)
+    predictions_df['PROBABILIDAD'].replace({0: np.nan}, inplace=True)
+    predictions_df.dropna(inplace=True)
+    return predictions_df
+
+
+@app.callback(
+    Output("prob-graph", "figure"),
+    [
+        Input("prob-gender", "value"),
+        Input("prob-age", "value"),
+        Input("prob-comuna", "value"),
+        Input("prob-barrio", "value")
+    ]
+)
+def plot_prob_bar(gender, age, comuna, barrio):
+    fig = go.Figure()
+    if gender is not None and age is not None and comuna is not None and barrio is not None:
+        df = random_forest_probability(gender.upper(), age, comuna.upper(), barrio.upper())
+        df.loc[:, applicationconstants.TIPO_DELITO] = df[applicationconstants.TIPO_DELITO].str.capitalize()
+        fig = px.bar(
+            df.sort_values(by="PROBABILIDAD", ascending=False),
+            x=applicationconstants.TIPO_DELITO,
+            y='PROBABILIDAD',
+            color='PROBABILIDAD',
+            color_continuous_scale=px.colors.sequential.Blues,
+            labels={'PROBABILIDAD': '% Probabilidad', applicationconstants.TIPO_DELITO: 'Tipo de delito'}
+        )
+        fig.update_traces(
+            marker_line_color='rgb(8,48,107)',
+            marker_line_width=0.2,
+            opacity=0.8)
+        fig.update_layout(
+            font_family="revert",
+            font_color="#5f5f5f",
+            paper_bgcolor="white",
+            xaxis_tickangle=45
+        )
     return fig

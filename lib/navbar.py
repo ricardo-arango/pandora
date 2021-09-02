@@ -8,7 +8,7 @@ navbar = dbc.Navbar(
                 dbc.Row(
                     [
                         dbc.Col(html.Img(src=app.get_asset_url("escudo-sm.svg"), className="escudo-banner")),
-                        dbc.Col(dbc.NavbarBrand("P A N D O R A", className="ml-2",style={"color":"#bbbbbb"}))
+                        dbc.Col(dbc.NavbarBrand("P A N D O R A", className="ml-2", style={"color": "#bbbbbb", "padding-bottom": "7px"}))
                     ],
                     align="center",
                     no_gutters=True,

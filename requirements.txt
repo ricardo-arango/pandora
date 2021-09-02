@@ -8,6 +8,7 @@ fontawesomefree
 folium
 geopandas
 geopy
+joblib
 numpy
 matplotlib
 plotly
