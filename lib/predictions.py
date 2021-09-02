@@ -18,12 +18,12 @@ from tensorflow.keras import models
 raw_data = pd.read_csv('data/2010-2021.csv')
 
 #Neural Network
-model = models.load_model('data/Neural_net_Mintic.h5')
-model_data = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
-raw_data[applicationconstants.TIPO_DELITO].replace({'NO REPORTA': np.nan}, inplace=True)
-raw_data.dropna(inplace=True)
-tipo_delito = raw_data[applicationconstants.TIPO_DELITO].str.strip().unique()
-model_input = model_data.drop(tipo_delito, axis=1).columns
+# model = models.load_model('data/Neural_net_Mintic.h5')
+# model_data = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
+# raw_data[applicationconstants.TIPO_DELITO].replace({'NO REPORTA': np.nan}, inplace=True)
+# raw_data.dropna(inplace=True)
+# tipo_delito = raw_data[applicationconstants.TIPO_DELITO].str.strip().unique()
+# model_input = model_data.drop(tipo_delito, axis=1).columns
 
 # Tree
 forest_train = pd.read_csv('data/forestTrain.csv', index_col=0)
@@ -111,21 +111,15 @@ injury_type_container = dbc.Container(
                                         dcc.Dropdown(
                                             id="predict-comuna",
                                             placeholder=applicationconstants.dropdown_placeholder,
-                                            options=[
-                                                {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
-                                            ]
                                         ),
-                                    ], width="2"),
+                                    ], width="4"),
                                     dbc.Col([
                                         dbc.Label(applicationconstants.barrio_label, className="labels-font labels-margin"),
                                         dcc.Dropdown(
                                             id="predict-barrio",
                                             placeholder=applicationconstants.dropdown_placeholder,
-                                            options=[
-                                                {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
-                                            ]
                                         ),
-                                    ], width="2"),
+                                    ], width="4"),
                                 ], style={"padding": "0 16px 0 16px"}),
                                 dcc.Graph(id="predictions-graph", style={"height": "74%"}),
                             ],
@@ -170,11 +164,6 @@ crime_probability_container = dbc.Container(
                                     ], width="2"),
                                     dbc.Col([
                                         dbc.Label(applicationconstants.age_label, className="labels-font labels-margin"),
-                                        # dcc.Input(
-                                        #     id="prob-age",
-                                        #     type="number",
-                                        #     min=1, max=120
-                                        # )
                                         dcc.Dropdown(
                                             id="prob-age",
                                             placeholder=applicationconstants.dropdown_placeholder,
@@ -219,6 +208,67 @@ crime_probability_container = dbc.Container(
         "background": "#f8f9fa"
     }
 )
+
+
+@app.callback(
+    Output("predict-comuna", "options"),
+    Input("predict-barrio", "value"),
+)
+def filter_comunas_by_barrio_predictions(barrio):
+    if barrio is not None:
+        barrio_by_comuna = raw_data[raw_data[applicationconstants.UNIDAD_ESPACIAL] == barrio.upper()][applicationconstants.COMUNA]
+        return [
+            {"label": col, "value": col} for col in barrio_by_comuna.astype('str').str.capitalize().unique()
+        ]
+    return [
+        {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
+    ]
+
+
+@app.callback(
+    Output("predict-barrio", "options"),
+    Input("predict-comuna", "value"),
+)
+def filter_barrioss_by_comuna_predictions(comuna):
+    if comuna is not None:
+        barrio_by_comuna = raw_data[raw_data[applicationconstants.COMUNA] == comuna.upper()][applicationconstants.UNIDAD_ESPACIAL]
+        return [
+            {"label": col, "value": col} for col in barrio_by_comuna.astype('str').str.capitalize().unique()
+        ]
+    return [
+        {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
+    ]
+
+
+@app.callback(
+    Output("prob-comuna", "options"),
+    Input("prob-barrio", "value"),
+)
+def filter_comunas_by_barrio_probability(barrio):
+    if barrio is not None:
+        barrio_by_comuna = raw_data[raw_data[applicationconstants.UNIDAD_ESPACIAL] == barrio.upper()][applicationconstants.COMUNA]
+        return [
+            {"label": col, "value": col} for col in barrio_by_comuna.astype('str').str.capitalize().unique()
+        ]
+    return [
+        {"label": col, "value": col} for col in raw_data[applicationconstants.COMUNA].astype('str').str.capitalize().unique()
+    ]
+
+
+@app.callback(
+    Output("prob-barrio", "options"),
+    Input("prob-comuna", "value"),
+)
+def filter_barrioss_by_comuna_probability(comuna):
+    if comuna is not None:
+        barrio_by_comuna = raw_data[raw_data[applicationconstants.COMUNA] == comuna.upper()][applicationconstants.UNIDAD_ESPACIAL]
+        return [
+            {"label": col, "value": col} for col in barrio_by_comuna.astype('str').str.capitalize().unique()
+        ]
+    return [
+        {"label": col, "value": col} for col in raw_data[applicationconstants.UNIDAD_ESPACIAL].astype('str').str.capitalize().unique()
+    ]
+
 
 
 @app.callback(
