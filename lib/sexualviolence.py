@@ -4,7 +4,9 @@ import dash_core_components as dcc
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+import numpy as np
 import dataloading
+
 from lib import applicationconstants
 from app import app
 from dataloading import barrio_geojson
@@ -45,6 +47,7 @@ view_by = [
     {"label": "Grupo etario víctima", "value": applicationconstants.GRUPO_ETARIO_VICTIMA},
     {"label": "Estado civil víctima", "value": applicationconstants.ESTADO_CIVIL_VICTIMA}
 ]
+yearDropdownOptions = np.append([applicationconstants.all_label], dataloading.crime_df[applicationconstants.AÑO].unique())
 
 sexual_violence_container = dbc.Container(
     [
@@ -86,7 +89,7 @@ sexual_violence_container = dbc.Container(
                                 ], style={"padding": "0 16px 0 16px"}),
                                 dcc.Graph(id="sex_violence_graph_table")
                             ],
-                            className="sex-violence-panel"
+                            className="heat-map-panel"
                         )
                     ],
                     width="7"
@@ -94,26 +97,55 @@ sexual_violence_container = dbc.Container(
                 dbc.Col(
                     [
                         html.Div([
-                            html.H5(
-                                "Ubicación geográfica",
-                                className="tile-title"),
-                                dbc.Row(
-                                [
-                                    dbc.Col([
-                                        dbc.Label(applicationconstants.crime_type_label, className="labels-font labels-margin"),
-                                            dcc.Dropdown(
-                                                id="sex_violence_crime_type",
-                                                options=[
-                                                    {"label": col, "value": col} for col in
-                                                    voi
-                                                ]
-                                            ),
-                                    ], width="12")
-                                ], style={"padding": "0 16px 0 16px"}),
-                                html.Br(), html.Br(),
-                                dbc.Spinner(dcc.Graph(id="sexual-violence-map-plot"), color="info")
+                            html.H5("Ubicación geográfica", className="tile-title"),
+                            html.Hr(),
+                            dbc.Row(
+                            [
+                                dbc.Col([
+                                    dbc.Label(applicationconstants.year_label, className="labels-font labels-margin"),
+                                    dcc.Dropdown(
+                                        id="sex-violence-year",
+                                        options=[
+                                            {"label": col, "value": col} for col in yearDropdownOptions
+                                        ],
+                                        value=applicationconstants.all_label
+                                    ),
+                                ], width="4"),
+                                dbc.Col([
+                                    dbc.Label(applicationconstants.month_label, className="labels-font labels-margin"),
+                                    dcc.Dropdown(
+                                        id="sex-violence-month",
+                                        options=dataloading.months
+                                    ),
+                                ], width="4"),
+                                dbc.Col([
+                                    dbc.Label(applicationconstants.week_day_label, className="labels-font labels-margin"),
+                                    dcc.Dropdown(
+                                        id="sex-violence-week-day",
+                                        options=[
+                                            {"label": col, "value": col} for col in dataloading.crime_df[applicationconstants.DIA_SEMANA].str.capitalize().unique()
+                                        ]
+                                    ),
+                                ], width="4")
+                            ], style={"padding": "0 16px 0 16px"}),
+                            dbc.Row(
+                            [
+                                dbc.Col([
+                                    dbc.Label(applicationconstants.crime_type_label, className="labels-font labels-margin"),
+                                    dcc.Dropdown(
+                                        id="sex-violence-crime-type",
+                                        options=[
+                                            {"label": col, "value": col} for col in
+                                            voi
+                                        ]
+                                    ),
+                                ], width="12"),
+
+                            ], style={"padding": "0 16px 0 16px"}),
+                            html.Br(), html.Br(),
+                            dbc.Spinner(dcc.Graph(id="sex-violence-map-plot"), color="info")
                         ],
-                            className="sex-violence-panel"
+                            className="heat-map-panel"
                         )
                     ], width="5"
                 )
@@ -170,19 +202,35 @@ def plot_heat_map(view_type, opt):
     return fig
 
 @app.callback(
-    Output("sexual-violence-map-plot", "figure"),
-    Input("sex_violence_crime_type", "value"),
+    Output("sex-violence-map-plot", "figure"),
+    Input("sex-violence-year", "value"),
+    Input("sex-violence-month", "value"),
+    Input("sex-violence-week-day", "value"),
+    Input("sex-violence-crime-type", "value"),
 )
-def map_plot(crime_type):
+def map_plot(year, month, week_day, crime_type):
     cases_df = dataloading.crime_df.copy()
+    if not year:
+        year = 2010
+
+    if year != applicationconstants.all_label:
+        cases_df = cases_df[cases_df[applicationconstants.AÑO] == int(year)]
+
     cases_df.loc[:, applicationconstants.TIPO_DELITO] = cases_df[applicationconstants.TIPO_DELITO].str.capitalize()
-    cases_df = cases_df[cases_df[applicationconstants.TIPO_DELITO] == crime_type]
+    cases_df.loc[:, applicationconstants.DIA_SEMANA] = cases_df[applicationconstants.DIA_SEMANA].str.capitalize()
+    cases_df.loc[:, applicationconstants.MES] = cases_df[applicationconstants.MES].str.capitalize()
+
+    if month:
+        cases_df = cases_df[cases_df[applicationconstants.MES_num] == month]
+    if week_day:
+        cases_df = cases_df[cases_df[applicationconstants.DIA_SEMANA] == week_day]
+    if crime_type:
+        cases_df = cases_df[cases_df[applicationconstants.TIPO_DELITO] == crime_type]
     barrio_cn = cases_df.groupby(applicationconstants.UNIDAD_ESPACIAL)[applicationconstants.CRIMEN_ID].count().reset_index(name="Casos")
     fig = px.choropleth(
         barrio_cn,
         geojson=barrio_geojson,
         color="Casos",
-        # color_continuous_scale=px.colors.sequential.Blues,
         color_continuous_scale=px.colors.sequential.Blues,
         locations=applicationconstants.UNIDAD_ESPACIAL, featureidkey="properties.NOMBRE",
         projection="mercator",

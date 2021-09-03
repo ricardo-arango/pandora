@@ -3,15 +3,17 @@
 # ################################################################################
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 
 from app import app
-from lib import sidebar, content, navbar, home, sexualviolence, predictions, tools, about
+from lib import sidebar, content, navbar, home, sexualviolence, othercrimes, predictions, tools, about
+
 
 # ################################################################################
 # Set app layout
 # ################################################################################
 app.layout = html.Div([dcc.Location(id="url"), navbar.navbar, sidebar.sidebar, content.content])
+
 
 # ################################################################################
 # Declare callbacks
@@ -22,6 +24,8 @@ def render_page_content(pathname):
         return home.home_container
     elif pathname == "/sexualviolence":
         return sexualviolence.sexual_violence_container
+    elif pathname == "/othercrimes":
+        return othercrimes.other_crimes_container
     elif pathname == "/predictions":
         return predictions.predictions_container
     elif pathname == "/tools":

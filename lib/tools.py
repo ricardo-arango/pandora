@@ -75,6 +75,7 @@ notice_label = "Pandora usa por defecto una versión ajustada y enriquecida de l
 drag_drop_notice_label = "Arrastre y sulte el archivo en el recuadro de abajo o haga click para seleccionar el archivo que desea considerar " \
 "para el análisis. Tenga en cuenta que el procesamiento y enriquecimiento de los datos puede tardar varios minutos. Una vez procesados, " \
 "Pandora mostrará el nombre del archivo subido y la fecha de la última vez que fue modificado."
+
 # ################################################################################
 # Declare container components
 # ################################################################################
@@ -105,6 +106,11 @@ tools_container = dbc.Container(
                                 dbc.Tab(
                                     label="Actualizar archivo CSV",
                                     tab_id="update-csv-tab",
+                                    labelClassName="tabs-font",
+                                    activeLabelClassName="tabs-font-selected"),
+                                dbc.Tab(
+                                    label="Perfil de datos",
+                                    tab_id="data-profile-tab",
                                     labelClassName="tabs-font",
                                     activeLabelClassName="tabs-font-selected")
                             ],
@@ -220,6 +226,41 @@ update_csv_container = dbc.Container(
     }
 )
 
+data_profile_container = dbc.Container(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Br(),
+                        html.Div(
+                            [
+                                dbc.Row([
+                                    dbc.Col(
+                                        [
+                                            html.Iframe(id='map', srcDoc=open('data/data-profile.html', 'r', encoding="utf8").read(), width='100%', height='2000', style={"border": "0"})
+
+                                        ], width=12,  style={"padding": "5px 0 0 0"}
+                                    ),
+                                ], style={"padding": "0 16px 0 16px"})
+                            ],
+                            className="panel-profiling"
+                        )
+                    ],
+                    width="12",
+                )
+            ]
+        )
+    ],
+    id="data-profile-container",
+    fluid=True,
+    style={
+        "width": "100%",
+        "background": "#f8f9fa"
+    }
+)
+
+
 @app.callback(
     Output("tools-tab-content", "children"),
     Input("tabs", "active_tab"),
@@ -228,7 +269,10 @@ def render_tab_content(active_tab):
     if active_tab is not None:
         if active_tab == "update-csv-tab":
             return update_csv_container
+        elif active_tab == "data-profile-tab":
+            return data_profile_container
     return update_csv_container
+
 
 # ################################################################################
 # Declare functions
@@ -340,6 +384,7 @@ def parse_contents(contents, filename, date):
         return 'Hubo un error procesando el archivo. Asegúrese de que este siga los requerimientos anteriormente descritos.', ''
 
     return 'Nombre de archivo: ' + filename, 'Última fecha de actualización de archivo: ' + datetime.datetime.fromtimestamp(date).strftime('%d/%m/%Y')
+
 
 # ################################################################################
 # Declare callbacks
