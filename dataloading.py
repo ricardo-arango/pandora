@@ -10,7 +10,6 @@
 # ################################################################################
 import geopandas
 import pandas as pd
-import psycopg2
 
 from lib import applicationconstants
 # ################################################################################
@@ -77,31 +76,10 @@ months_caps = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', '
 week_days_caps = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO']
 age_group_caps = ['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR', 'NO REPORTA']
 
-conn = None
-try:
-    # connect to the PostgreSQL server
-    connection = psycopg2.connect(
-        host="bucaramangadb.cx4nqzuqwvdx.us-east-1.rds.amazonaws.com",
-        database="crimenes",
-        user="dbadmin",
-        password="rootadmin"
-    )
-    cursor = connection.cursor()
-    cursor.execute('select * from casos')
-    crime_df = pd.DataFrame(cursor.fetchall(), columns=crime_df_columns)
-    crime_df = crime_df.astype(dtypes)
-    cursor.execute('select * from estacion_policia')
-    police_df = pd.DataFrame(cursor.fetchall(), columns=police_df_columns)
-    print("Connection successful.")
-except (Exception, psycopg2.DatabaseError) as error:
-    print("Error retrieving data from server: reading data from backup files.")
-    print(error)
-    crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",", encoding="utf-8", dtype=dtypes, parse_dates=[applicationconstants.FECHA])
-    police_df = pd.read_csv("data/Estaciones_policia.csv", delimiter=",", encoding="utf-8")
-finally:
-    if connection is not None:
-        cursor.close()
-        connection.close()
+crime_df = pd.read_csv("data/2010-2021.csv", delimiter=",", dtype=dtypes, parse_dates=[applicationconstants.FECHA])
+police_df = pd.read_csv("data/Estaciones_policia.csv", delimiter=",")
+
+
 
 # Adjust value order of several categorical fields
 column_dtype = pd.api.types.CategoricalDtype(categories=months_caps, ordered=True)

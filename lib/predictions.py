@@ -18,12 +18,12 @@ from tensorflow.keras import models
 raw_data = pd.read_csv('data/2010-2021.csv')
 
 #Neural Network
-# model = models.load_model('data/Neural_net_Mintic.h5')
-# model_data = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
-# raw_data[applicationconstants.TIPO_DELITO].replace({'NO REPORTA': np.nan}, inplace=True)
-# raw_data.dropna(inplace=True)
-# tipo_delito = raw_data[applicationconstants.TIPO_DELITO].str.strip().unique()
-# model_input = model_data.drop(tipo_delito, axis=1).columns
+model = models.load_model('data/Neural_net_Mintic.h5')
+model_data = pd.read_csv('data/NeuralNetworksData.csv', index_col=0)
+raw_data[applicationconstants.TIPO_DELITO].replace({'NO REPORTA': np.nan}, inplace=True)
+raw_data.dropna(inplace=True)
+tipo_delito = raw_data[applicationconstants.TIPO_DELITO].str.strip().unique()
+model_input = model_data.drop(tipo_delito, axis=1).columns
 
 # Tree
 forest_train = pd.read_csv('data/forestTrain.csv', index_col=0)

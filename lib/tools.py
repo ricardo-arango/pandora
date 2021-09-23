@@ -67,12 +67,12 @@ db_requirements = pd.DataFrame(
 
 notice_label = "Pandora usa por defecto una versión ajustada y enriquecida de la base de datos de delitos registrados en Bucaramanga " \
 "entre Enero de 2010 y Febrero de 2021 del repositorio de Datos Abiertos del Gobierno de Colombia. El enriquecimiento de los datos " \
-"consiste en la union espacial de la base de datos con los polígonos de barrios, comunas y corregimientos y y el cálculo de la distancia " \
+"consiste en la unión espacial de la base de datos con los polígonos de barrios, comunas y corregimientos y el cálculo de la distancia " \
 "de cada delito a la estación de policía más cercana. Si el usuario desea considerar una base de datos diferente para el análisis, debe " \
 "preparar un archivo en formato csv con los campos y formatos que se muestran a continuación. Los campos relacionados con la fecha de " \
-"cada delito no puede tener datos faltantes."
+"cada delito no pueden tener datos faltantes."
 
-drag_drop_notice_label = "Arrastre y sulte el archivo en el recuadro de abajo o haga click para seleccionar el archivo que desea considerar " \
+drag_drop_notice_label = "Arrastre y suelte el archivo en el recuadro de abajo o haga click para seleccionar el archivo que desea considerar " \
 "para el análisis. Tenga en cuenta que el procesamiento y enriquecimiento de los datos puede tardar varios minutos. Una vez procesados, " \
 "Pandora mostrará el nombre del archivo subido y la fecha de la última vez que fue modificado."
 
